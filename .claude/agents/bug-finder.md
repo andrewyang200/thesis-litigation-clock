@@ -34,7 +34,7 @@ Based on the file type or scope given to you:
 ## Code Bugs (for .R files)
 
 ### Data Integrity
-- [ ] Are disposition codes mapped correctly? (5,6,12,13 → settlement; 2,11,14,15 → dismissal)
+- [ ] Are disposition codes mapped correctly per FJC Codebook? Scheme A: Settlement = code 13; Dismissal = codes 2,3,4,6,12,14,15,17,18,19. See `code/01_clean.R::code_events()` for authoritative three-scheme (A/B/C) mapping.
 - [ ] Is the PSLRA cutoff date correct? (Dec 22, 1995)
 - [ ] Are negative or zero durations handled? (filing date >= termination date)
 - [ ] Are NAs in key variables handled explicitly?

@@ -52,28 +52,36 @@ names(circuit_colors) <- c(paste0("Circuit ", 1:11), "DC", "Federal")
 save_figure <- function(plot, filename, width = 8, height = 6, dpi = 300) {
   # Save as both PDF (for thesis) and PNG (for preview)
   ggsave(
-    filename = file.path("output", "figures", paste0(filename, ".pdf")),
+    filename = here::here("output", "figures", paste0(filename, ".pdf")),
     plot = plot, width = width, height = height, device = "pdf"
   )
   ggsave(
-    filename = file.path("output", "figures", paste0(filename, ".png")),
+    filename = here::here("output", "figures", paste0(filename, ".png")),
     plot = plot, width = width, height = height, dpi = dpi, device = "png"
   )
   message(sprintf("Saved: output/figures/%s.{pdf,png}", filename))
 }
 
 save_table <- function(tbl, filename, caption = "", label = "") {
-  writeLines(tbl, file.path("output", "tables", paste0(filename, ".tex")))
+  writeLines(tbl, here::here("output", "tables", paste0(filename, ".tex")))
   message(sprintf("Saved: output/tables/%s.tex", filename))
 }
 
 # --- Data Helpers ---
-# Standard event coding
+# Standard event coding (Scheme A — primary analysis)
+# Source: FJC IDB Codebook (fjc_disposition_manual.pdf)
+#   Settlement: Code 13 (settlement)
+#   Dismissal:  Codes 2 (want of prosecution), 3 (lack of jurisdiction),
+#               4 (default judgment), 6 (judgment on motion), 12 (voluntary),
+#               14 (judgment: court trial), 15 (judgment: jury trial),
+#               17 (judgment: directed), 18 (judgment: other), 19 (dismissal: other)
+#   Censored:   Everything else (transfers, remands, pending)
+# NOTE: Schemes B and C reclassify codes 12 and 5 — see code/01_clean.R::code_events()
 code_event <- function(disposition) {
   case_when(
-    disposition %in% c(5, 6, 12, 13)  ~ 1L,  # Settlement
-    disposition %in% c(2, 11, 14, 15)  ~ 2L,  # Dismissal
-    TRUE                                ~ 0L   # Censored/other
+    disposition == 13                                     ~ 1L,  # Settlement
+    disposition %in% c(2, 3, 4, 6, 12, 14, 15, 17, 18, 19) ~ 2L,  # Dismissal
+    TRUE                                                  ~ 0L   # Censored/other
   )
 }
 

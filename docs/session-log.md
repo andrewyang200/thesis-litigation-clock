@@ -59,3 +59,35 @@ Read this FIRST at the start of every session (via /project:plan).
 - **Piecewise IPTW**: If PH is violated in the IPTW model (expected), we need piecewise IPTW with the same three time periods — this adds complexity to Task 6
 - **Second Circuit anomaly**: Should we investigate whether the extreme settlement HR is a coding artifact (Scheme B vs A) before building IPTW models?
 ---
+
+## Session: 2026-03-27 (Task 1 — Data Cleaning Pipeline)
+### Plan Progress
+- Tasks completed this session: Task 1 (Modularize Code Pipeline — Data Cleaning)
+- Current position in plan: Task 1 of 16 COMPLETE — ready for Task 2
+- Plan modifications needed: Minor — Code 6 reclassification changes the baseline outcome distribution (see Key Decisions). All downstream scripts will use the updated Scheme A mapping. The execution plan's expected numbers (e.g., "HR = 1.638 for dismissal") will change when models are re-run on the new data.
+### Completed
+- Extracted InterimScript.R Sections 1-6 into standalone `code/01_clean.R`
+- Script runs independently from project root: `Rscript code/01_clean.R`
+- Produces `data/cleaned/securities_cohort_cleaned.rds` (12,968 rows, 68 cols)
+- Produces `data/cleaned/securities_scheme_B.rds` and `securities_scheme_C.rds` (68 cols each, full covariates)
+- Pipeline counts verified: 65,899 → 13,708 → 12,968 (matches data.tex)
+- Added Code 6 (judgment on motion) to dismissal list per FJC Codebook
+- Synchronized disposition mapping across 4 files: `01_clean.R`, `utils.R`, `CLAUDE.md`, `bug-finder.md`
+- Replaced `file.path()` with `here::here()` in `01_clean.R` and `utils.R` output helpers
+- Added `stopifnot()` validation before disposition coding
+- Added data quality warnings for `juris_fq` (99.6% constant) and `log_demand` (98.4% missing)
+- Documented origin codes 7-12 as intentionally NA
+- Passed 3 rounds of r-code-reviewer agent review (0 CRITICALs remaining)
+### Key Decisions
+- **Code 6 reclassified from censored to dismissal**: Per FJC Codebook, Code 6 ("Motion Before Trial") represents a terminal disposition by final judgment — in securities litigation, this is a granted Motion to Dismiss or Summary Judgment. This moves 2,389 cases (18.4% of cohort) from censored to dismissal. New Scheme A distribution: 15.5% settlement, 74.8% dismissal, 9.6% censored (was 15.5/56.4/28.1). This is a substantive analytical change that will affect all model results.
+- **All three schemes get full covariates**: Scheme B/C .rds files now contain all 68 columns (post_pslra, circuit_f, origin_cat, etc.), so `08_robustness.R` can load them directly without covariate reconstruction.
+- **`juris_fq` flagged as near-degenerate**: 99.6% federal question. Should be excluded from regression models or handled with care.
+- **`log_demand` flagged as unusable**: 98.4% missing. Only 212 valid observations. Downstream models should not include it in standard regression.
+### Next Steps
+- **Task 2**: Modularize remaining InterimScript sections into `02_descriptives.R`, `03_cox_models.R`, `04_fine_gray.R`, `08_robustness.R`
+- Preparation: read InterimScript.R Sections 7-17, understand the analytical pipeline
+- NOTE: All downstream models will produce different results from those currently in the thesis because Code 6 reclassification changed the outcome distribution. Task 4 (number verification) will catch and document all discrepancies.
+### Open Issues
+- **Code 6 impact on existing thesis numbers**: The HR, CI, and p-values in `results.tex` and `data.tex` were computed with Code 6 censored. They will all change. Task 4 will systematically verify and update.
+- **Previous open issues still unresolved**: RISK-C1 (IPTW framing), narrow-window IPTW, disposition scheme for IPTW, piecewise IPTW, Second Circuit anomaly — all deferred to Phase 2.
+---

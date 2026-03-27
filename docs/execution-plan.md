@@ -206,7 +206,7 @@ These are done and good. Do not modify unless a number verification reveals an e
 ---
 
 #### Task 1 [FIX]: Modularize Code Pipeline — Data Cleaning
-- [ ] Not started
+- [x] COMPLETE (2026-03-27)
 
 **WHAT**: Extract InterimScript Sections 1-6 into `01_clean.R`. Fix the hardcoded data path. Update `utils.R` to be actively sourced. Save the cleaned analysis dataset as `data/cleaned/securities_cohort_cleaned.rds`.
 

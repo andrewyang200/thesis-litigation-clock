@@ -12,7 +12,11 @@ How do legal regime changes (PSLRA), court geography (federal circuit), and case
 - **Source**: Federal Judicial Center (FJC) Integrated Database (IDB)
 - **Universe**: ~12,968 securities class actions (NOS 850), 1990–2024
 - **Key fields**: filing date, termination date, NOS code, disposition codes, cause-of-action (statutory basis), class-action flag, jurisdiction, circuit, origin, MDL status, monetary demand
-- **Competing risks**: Settlement (disposition codes 5,6,12,13) vs. Dismissal (codes 2,6,11,14,15)
+- **Competing risks** (three disposition coding schemes per FJC IDB Codebook):
+  - **Scheme A (Primary)**: Settlement = code 13; Dismissal = codes 2,3,4,6,12,14,15,17,18,19; all else censored
+  - **Scheme B (Liberal)**: Reclassifies code 12 (voluntary dismissal) as settlement (hidden settlements)
+  - **Scheme C (Expanded)**: Scheme B + code 5 (consent judgment) reclassified as settlement
+  - Codes 0,1,10,11 (transfers/remands) and codes 7-9 (trial outcomes without judgment) are censored in all schemes
 - Data lives in `data/` directory. Raw IDB extract is `data/raw/`. Cleaned analysis-ready data is `data/cleaned/`.
 
 ## Methods (in order of complexity)
@@ -20,7 +24,7 @@ How do legal regime changes (PSLRA), court geography (federal circuit), and case
 2. Cumulative Incidence Functions (CIF) — Aalen-Johansen estimator for competing risks
 3. Cause-specific Cox proportional hazards models (one per outcome)
 4. Fine-Gray subdistribution hazard models
-5. Propensity Score Weighting (IPTW) — to achieve covariate balance and isolate the causal hazard ratio of the PSLRA.
+5. Propensity Score Weighting (IPTW) — composition-adjusted estimates that isolate the PSLRA component from concurrent changes in case composition. NOT causal — use "composition-adjusted" language.
 6. Shared Frailty Models (Mixed Effects) — to account for unobserved heterogeneity and clustering within judicial circuits.
 7. Model diagnostics: C-index, time-dependent AUC (`timeROC`), Covariate Balance (IPTW), Frailty Variance, and Schoenfeld residuals for PH testing
 
