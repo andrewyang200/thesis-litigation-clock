@@ -236,34 +236,35 @@ Save this complete three-stage assessment to docs/discovery-assessment.md.
 
 **Prompt — The Planning Prompt:**
 ```
-Read docs/discovery-assessment.md (the assessment you just produced).
+Read docs/discovery-assessment.md.
 
-Now create a DETAILED EXECUTION PLAN.
+You are now the Lead Architect. Taking what you now know, create a PROJECT-WIDE REFACTORING & EXECUTION PLAN to take this thesis from its current "Interim" state to a "Final" causal inference submission.
 
-Requirements for the plan:
-1. Break the work into discrete, independently completable tasks
-2. Each task should be ONE session's worth of work (roughly 1-2 hours of Claude Code time)
-3. Order tasks by dependency — what must be done before what
-4. For each task, specify:
-   - WHAT: exactly what needs to be done
-   - WHY: why this task matters (connects to rubric, advisor feedback, or thesis quality)
-   - INPUTS: what files need to be read
-   - OUTPUTS: what files will be created or modified
-   - ACCEPTANCE CRITERIA: how do we know this task is done correctly
-   - RISKS: what could go wrong and what's the fallback
-5. Mark each task as one of:
-   - FIX: repairing something that exists but is broken
-   - EXTEND: building on something that partially exists
-   - CREATE: building from scratch
-   - REVIEW: evaluating existing work without changing it
-6. Include THREE mandatory adversarial checkpoints:
-   - After all code/analysis is done → /project:challenge on all code
-   - After all writing is done → /project:challenge on full thesis
-   - Before submission → final /project:challenge as last gate
-7. Include explicit "DO NOT TOUCH" items — things that are already good and should be preserved
-8. Be realistic about what can be done by April 9. If something is nice-to-have vs. must-have, label it.
-9. Estimate total sessions needed. If it's more than ~15 sessions, identify what to cut.
-10. Clearly separate MUST-HAVE (minimum viable thesis) from NICE-TO-HAVE (aspirational).
+The Core Mandate: Cascading Consistency Every change in methodology MUST cascade through all files. If RSF is deleted from the code, its "contribution" must be deleted from the Intro, its "derivation" from Methodology, its "plots" from Results, and its "limitations" from the Discussion. Likewise, if a new methodological is used, be sure to mention it in relevant chapters (i.e. literature review, methodology, etc)
+
+Requirements for the Plan:
+- Modularize the Monolith: Break InterimScript.R into a numbered pipeline (e.g., 01_clean.R, 02_descriptives.R, 03_cox_models.R, 04_causal_iptw.R).
+- Surgical Repairs First: Fix the Section 19 crash, the Fine-Gray C-index logic, and data paths before any new writing occurs.
+- The Results Restructure: Plan a complete rewrite of Section 5 to be organized by Substantive Claims (e.g., "The Impact of PSLRA," "Geographic Disparity") rather than model types.
+- Break the work into discrete, independently completable tasks
+- Session-Based Tasks: Each task must be a 1-2 hour unit of work. For each, specify:
+  - WHAT: exactly what needs to be done
+  - WHY: why this task matters (connects to rubric, advisor feedback, or thesis quality)
+  - INPUTS: what files need to be read
+  - OUTPUTS: what files will be created or modified
+  - ACCEPTANCE CRITERIA: how do we know this task is done correctly
+  - RISKS: what could go wrong and what's the fallback
+- Mark each task as one of:
+  - FIX: repairing something that exists but is broken
+  - EXTEND: building on something that partially exists
+  - CREATE: building from scratch
+  - REVIEW: evaluating existing work without changing it
+- Include THREE mandatory adversarial checkpoints:
+  - After all code/analysis is done → /project:challenge on all code
+  - After all writing is done → /project:challenge on full thesis
+  - Before submission → final /project:challenge as last gate
+- Pruning Protocol: Explicitly list the deletion of the RSF blocks and the "Future Work" memo as standalone tasks to clear context.
+- Include explicit "DO NOT TOUCH" items — things that are already good and should be preserved
 
 CRITICAL CONSTRAINTS:
 - Never plan to fabricate results. If a model won't work, the plan should say "attempt X; 
@@ -272,8 +273,14 @@ CRITICAL CONSTRAINTS:
 - The thesis must be self-contained per the advisor's directive. The plan must include accessibility review.
 - **Pruning Mandate:** You have explicit permission to aggressively DELETE and remove any deprecated legacy work from the interim report (e.g., Random Survival Forests, machine learning prediction framing) that conflicts with our pivot to Causal Inference. Do not try to salvage deprecated methodology.
 
+Task Categories:
+- FOUNDATION: Bug fixes, modularization, path updates, figure format shift (PNG → PDF).
+- CAUSAL BUILD: IPTW pipeline and Shared Frailty implementation + diagnostics.
+- CHAPTER RECONSTRUCTION: Rewriting Intro, Methodology, Results, and Discussion to reflect the pivot.
+- POLISH: Abstract, Acknowledgements, hyperref, and final verification.
+
 Present the plan as a numbered task list I can approve, modify, or reorder.
-Wait for my approval before executing anything.
+Wait for my approval before executing anything. Save the final plan to docs/execution-plan.md.
 ```
 
 **BEFORE you approve the plan, manually verify the dependency chain:**

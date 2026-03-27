@@ -16,4 +16,4 @@ Then:
   3. Are there any blockers or open issues from previous sessions?
   4. Is an adversarial checkpoint due? (check if we just finished a phase)
 
-Keep the proposal short. Wait for confirmation before executing.
+The execution plan should be extremely detailed and comprehensive. Wait for confirmation before executing.

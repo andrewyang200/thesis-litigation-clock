@@ -42,6 +42,7 @@ Based on the file type or scope given to you:
 - [ ] Are factor levels what the model expects?
 - [ ] Does the event coding match what each model function expects?
 - [ ] Does the script respect the "No Raw Data in Context" rule? (It must not `cat()` large files or print unfiltered dataframes to stdout).
+- [ ] Does the mapping of disposition codes and statutory bases in the R scripts match the official definitions found in docs/fjc_disposition_manual.pdf?
 
 ### Statistical Correctness
 - [ ] Is CIF computed with Aalen-Johansen, NOT 1 - KM?
