@@ -231,7 +231,7 @@ These are done and good. Do not modify unless a number verification reveals an e
 ---
 
 #### Task 2 [FIX]: Modularize Code Pipeline — Analysis Scripts
-- [ ] Not started
+- [x] COMPLETE (2026-03-27)
 
 **WHAT**: Extract the remaining working sections of InterimScript into modular scripts:
 - `02_descriptives.R`: Sections 7-10 (KM, CIF plots, Gray's tests, descriptive tables)

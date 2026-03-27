@@ -91,3 +91,40 @@ Read this FIRST at the start of every session (via /project:plan).
 - **Code 6 impact on existing thesis numbers**: The HR, CI, and p-values in `results.tex` and `data.tex` were computed with Code 6 censored. They will all change. Task 4 will systematically verify and update.
 - **Previous open issues still unresolved**: RISK-C1 (IPTW framing), narrow-window IPTW, disposition scheme for IPTW, piecewise IPTW, Second Circuit anomaly — all deferred to Phase 2.
 ---
+
+## Session: 2026-03-27 (Task 2 — Modularize Analysis Scripts)
+### Plan Progress
+- Tasks completed this session: Task 2 (Modularize Code Pipeline — Analysis Scripts)
+- Current position in plan: Task 2 of 16 COMPLETE — ready for Task 3
+- Plan modifications needed: Minor — `stat_basis_miss` removed from all formulas (NA→explicit "Missing" factor level instead). `ext_formula_rhs` no longer includes `stat_basis_miss`.
+### Completed
+- Extracted InterimScript Sections 7-10 into `code/02_descriptives.R` (KM, CIF, Gray's tests, 5 figures)
+- Extracted Sections 11-13, 15-16 into `code/03_cox_models.R` (baseline, piecewise, circuit, extended, interaction Cox models)
+- Extracted Sections 14-15 (Fine-Gray) into `code/04_fine_gray.R` (baseline + extended subdistribution models + comparison table)
+- Extracted Section 17 into `code/08_robustness.R` (3 schemes, temporal restriction, circuit-specific, forest plot)
+- All 4 scripts run independently from project root via `Rscript code/XX_name.R`
+- Fixed `stat_basis_miss` aliasing bug: converted `stat_basis_f` NA to explicit "Missing" factor level in 03 and 04 scripts. All 12,866 extended-model rows now contribute.
+- Fixed deprecated `geom_errorbarh()` → `geom_errorbar(..., orientation = "y")`
+- Fixed fragile p-value extraction in robustness helper (`$coef[5]` → named indexing)
+- Fixed misleading "consistent" subtitle in robustness forest plot
+- Fixed unicode em-dash rendering issue in PDF output
+- Saved model objects to `output/models/` (cox_models.rds, fine_gray_models.rds)
+- Passed 3-agent R code review (0 CRITICALs remaining after fixes)
+### Key Decisions
+- **`stat_basis_miss` removed from formulas**: The missingness indicator was aliased (NA coefficient) because coxph silently dropped the 134 rows with `stat_basis_f == NA`. Fix: use `fct_na_value_to_level()` to create an explicit "Missing" level. This adds a proper "Missing" coefficient to all extended models. The ext_formula_rhs is now `post_pslra + circuit_f + origin_cat + mdl_flag + juris_fq + stat_basis_f` (no `stat_basis_miss`).
+- **Figure naming convention**: New figures use descriptive names (`fig_km_overall`, `fig_cif_pslra`, etc.) without numbered prefixes. Old `figureN_*.png` files from InterimScript remain in `output/figures/` and will be cleaned in Task 5.
+- **Color palette**: Kept original green (#1B7837)/red (#B2182B) for Settlement/Dismissal in figures, despite utils.R defining blue/red. Changing mid-project risks inconsistency with existing thesis figures. Deferred to Phase 4 polish.
+- **Interaction models omit stat_basis**: The PSLRA × Circuit interaction models use a reduced covariate set (no stat_basis) to limit parameter count. Documented in code comments.
+### Next Steps
+- **Task 3**: Create diagnostics script (`07_diagnostics.R`) — Schoenfeld residuals, C-index, time-dependent AUC
+- Preparation: read InterimScript Sections 18-21, 23. Load saved model objects from `output/models/`.
+- Fix the fatal Section 19 bug (`lp_s`/`lp_d` used before definition)
+- Compute Fine-Gray C-index independently (not copied from Cox)
+### Open Issues
+- **Updated model results differ from thesis text**: All HRs now reflect Code 6 reclassification. Key changes:
+  - Baseline dismissal HR = 1.415 (was 1.638 in thesis — lower because Code 6 cases dilute the effect)
+  - Settlement HR = 0.378 (unchanged — Code 6 doesn't affect settlement coding)
+  - Extended model now uses 12,866 rows (was 12,732 due to stat_basis NA dropping)
+  - stat_basis_fMissing: Settlement HR=0.891, Dismissal HR=1.018 (new coefficients)
+- **Previous open issues still unresolved**: RISK-C1 (IPTW framing), narrow-window IPTW, Second Circuit anomaly — all deferred to Phase 2.
+---
