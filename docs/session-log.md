@@ -110,6 +110,9 @@ Read this FIRST at the start of every session (via /project:plan).
 - Fixed unicode em-dash rendering issue in PDF output
 - Saved model objects to `output/models/` (cox_models.rds, fine_gray_models.rds)
 - Passed 3-agent R code review (0 CRITICALs remaining after fixes)
+- Passed final 2-agent review (bug-finder + cross-script consistency): 50+ items verified correct
+- Fixed `format_hr()` regex bug in utils.R — `|p` matched "exp(coef)" instead of "Pr(>|z|)"
+- Fixed fragile piecewise p-value extraction `[, 5]` → `[, "Pr(>|z|)"]` in 03_cox_models.R
 ### Key Decisions
 - **`stat_basis_miss` removed from formulas**: The missingness indicator was aliased (NA coefficient) because coxph silently dropped the 134 rows with `stat_basis_f == NA`. Fix: use `fct_na_value_to_level()` to create an explicit "Missing" level. This adds a proper "Missing" coefficient to all extended models. The ext_formula_rhs is now `post_pslra + circuit_f + origin_cat + mdl_flag + juris_fq + stat_basis_f` (no `stat_basis_miss`).
 - **Figure naming convention**: New figures use descriptive names (`fig_km_overall`, `fig_cif_pslra`, etc.) without numbered prefixes. Old `figureN_*.png` files from InterimScript remain in `output/figures/` and will be cleaned in Task 5.
@@ -126,5 +129,6 @@ Read this FIRST at the start of every session (via /project:plan).
   - Settlement HR = 0.378 (unchanged — Code 6 doesn't affect settlement coding)
   - Extended model now uses 12,866 rows (was 12,732 due to stat_basis NA dropping)
   - stat_basis_fMissing: Settlement HR=0.891, Dismissal HR=1.018 (new coefficients)
+- **Cross-script data derivation duplication**: 03 and 04 both independently construct df_circ/df_ext with identical logic. Reviewers recommend extracting into a `prepare_model_data()` function in utils.R before writing scripts 05-07.
 - **Previous open issues still unresolved**: RISK-C1 (IPTW framing), narrow-window IPTW, Second Circuit anomaly — all deferred to Phase 2.
 ---

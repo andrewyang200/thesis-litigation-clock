@@ -110,7 +110,7 @@ format_hr <- function(model, coef_name, digits = 2) {
     ci_lo <- exp(confint(model)[idx, 1])
     ci_hi <- exp(confint(model)[idx, 2])
     # Extract p-value (handles robust SE column shifting)
-    p_col <- grep("Pr\\(>\\|z\\|\\)|p", colnames(s$coefficients), value = TRUE)[1]
+    p_col <- grep("^Pr\\(", colnames(s$coefficients), value = TRUE)[1]
     p <- s$coefficients[idx, p_col]
   }
   

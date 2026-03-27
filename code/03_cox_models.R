@@ -120,7 +120,7 @@ pw_tbl <- tibble(
   HR       = round(exp(coef(cox_piecewise)), 3),
   CI_lower = round(exp(confint(cox_piecewise))[, 1], 3),
   CI_upper = round(exp(confint(cox_piecewise))[, 2], 3),
-  p_value  = round(summary(cox_piecewise)$coefficients[, 5], 4)
+  p_value  = round(summary(cox_piecewise)$coefficients[, "Pr(>|z|)"], 4)
 )
 print(pw_tbl)
 
@@ -147,7 +147,7 @@ pw_tbl_s <- tibble(
   HR       = round(exp(coef(cox_piecewise_s)), 3),
   CI_lower = round(exp(confint(cox_piecewise_s))[, 1], 3),
   CI_upper = round(exp(confint(cox_piecewise_s))[, 2], 3),
-  p_value  = round(summary(cox_piecewise_s)$coefficients[, 5], 4)
+  p_value  = round(summary(cox_piecewise_s)$coefficients[, "Pr(>|z|)"], 4)
 )
 print(pw_tbl_s)
 
