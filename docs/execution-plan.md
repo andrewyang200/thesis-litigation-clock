@@ -293,7 +293,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### Task 4 [FIX]: Run Full Pipeline & Verify All Numbers
-- [ ] Not started
+- [x] COMPLETE (2026-03-28)
 
 **WHAT**: Run scripts 01 through 08 end-to-end, capture ALL console output to a log file (`output/analysis_log.txt`). Then systematically verify every hard-coded number in `data.tex` and `results.tex` against the log.
 
