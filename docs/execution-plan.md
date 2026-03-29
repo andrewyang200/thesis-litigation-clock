@@ -348,8 +348,8 @@ Fix ALL known bugs during extraction:
 
 ---
 
-#### Task 6 [CREATE]: Implement IPTW Causal Analysis
-- [ ] Not started
+#### Task 6 [CREATE]: Implement IPTW Composition-Adjusted Analysis
+- [x] COMPLETE (2026-03-28)
 
 **WHAT**: Write `code/05_causal_iptw.R` implementing:
 1. **Propensity score model**: logistic regression for `post_pslra ~ circuit_f + origin_cat + mdl_flag + juris_fq + stat_basis_f + stat_basis_miss` (only pre-treatment covariates)

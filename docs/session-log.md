@@ -233,3 +233,47 @@ Read this FIRST at the start of every session (via /project:plan).
 - **All previous open issues carry forward**: stale prose in results.tex (7 TODO markers), timeROC iid=TRUE, cross-script duplication, RISK-C1 (IPTW framing), narrow-window IPTW, Second Circuit anomaly
 - **Phase 1 fully complete**: Tasks 1-5 all done. Foundation is solid. Phase 2 (Causal Build) begins next session.
 ---
+
+## Session: 2026-03-28 (Task 6 — IPTW Composition-Adjusted Analysis)
+### Plan Progress
+- Tasks completed this session: Task 6 (Implement IPTW Composition-Adjusted Analysis)
+- Current position in plan: Task 6 of 16 COMPLETE — ready for Task 7 (Shared Frailty)
+- Plan modifications needed: Minor — Task 6 scope expanded beyond the execution plan. The plan called for a 2-model comparison (unadjusted vs IPTW). We now have a 4-strategy triangulation (unadjusted, regression-adjusted, doubly robust, marginal structural). This strengthens the thesis substantially and addresses the devil's advocate finding that comparing regression vs IPTW on the same covariates is near-tautological. The comparison table in Tasks 11-12 (Results chapter) should use the 4-row triangulation format, not the original 2-row format.
+### Completed
+- **Kill-switch diagnostics** (`code/05_propensity_scores.R`): propensity score model, mirror density overlap plot, ESS=592.6 (57.5% efficiency), positivity check (0 cases with PS<0.01), all 21 covariates balanced. Decision: PROCEED.
+- **Full IPTW script** (`code/05_causal_iptw.R`): 4-strategy triangulation analysis
+  - Row 1: Unadjusted (PSLRA only) — Settlement HR=0.370, Dismissal HR=1.415
+  - Row 2: Regression-Adjusted (Extended Cox) — Settlement HR=0.609, Dismissal HR=1.736
+  - Row 3: Doubly Robust (IPTW + covariates) — Settlement HR=0.617, Dismissal HR=1.783
+  - Row 4: Marginal Structural (IPTW only) — Settlement HR=0.565, Dismissal HR=1.518
+- **Balance diagnostics**: Love plot saved to `output/figures/fig_iptw_balance.pdf`. All 21 covariates |SMD| < 0.1. PS distance SMD=0.112 (transparently reported).
+- **Weighted CIF plots**: `fig_cif_weighted_settlement.pdf`, `fig_cif_weighted_dismissal.pdf`
+- **PS overlap plot**: `fig_ps_overlap.pdf` (mirror density, pre vs post PSLRA)
+- **Model objects saved**: `output/models/iptw_results.rds` (all 8 models + comparison table + metadata)
+- **Devil's advocate review**: Identified the "rigged comparison" problem (comparing regression vs IPTW on same covariates is near-tautological). Led to the 4-row triangulation reframe.
+- **R code review**: Fixed 2 CRITICALs — (1) balance check was silently failing due to unnamed vector, (2) hardcoded balance claim was wrong. Both fixed and verified.
+- **Bug-finder investigation**: Confirmed IPTW weights are NOT uniform despite weak PS model (CV=0.86, max/min=37.6x). Weighting accounts for 85% of the total adjustment. The skeptic's claim that "weights are doing nothing" is empirically falsified.
+### Key Decisions
+- **RISK-C1 kill-switch: PROCEED**: ESS=593 > 300 threshold, good overlap, all covariates balanced. IPTW is feasible.
+- **4-strategy triangulation over 2-model comparison**: The devil's advocate correctly identified that comparing regression-adjusted vs IPTW (same covariates) is uninformative. Adding the truly-unadjusted (Row 1) and MSM (Row 4) makes the analysis honest and defensible. The informative comparison is Row 1 → Row 4 (full weighting effect: +53% for settlement) and the convergence of Rows 2/3/4 (functional form robustness).
+- **ATT estimand with 99th percentile trimming**: ATT preferred over ATE due to 11.5:1 imbalance. Trim cap at 48.56 (11 of 1,031 control cases trimmed). ESS improves from 521 to 593 with trimming.
+- **"Composition-adjusted" language enforced**: All code comments, console output, and framing use "composition-adjusted" — never "causal." Unmeasured confounders caveat appears in header, summary, and inline.
+- **PH violations acknowledged as time-averaging**: IPTW weighting amplifies PH violations (PSLRA dismissal goes from p=0.26 to p<2e-16). Weighted HRs are interpreted as time-averaged effects. The unweighted piecewise decomposition in 03_cox_models.R remains the preferred specification for time-varying effects.
+- **Decomposition finding**: 85% of the HR adjustment comes from weighting, 15% from additional regression. This means observable composition (circuit, origin, MDL, statutory basis) explains a substantial share of the raw PSLRA association, but the PSLRA effect survives adjustment.
+### Next Steps
+- **Task 7**: Implement Shared Frailty Models (`code/06_frailty.R`)
+  - Use `coxme::coxme()` with `(1 | circuit)` random effect
+  - Settlement and dismissal cause-specific models
+  - Compare frailty-adjusted PSLRA HR with fixed-effect HR
+  - Report frailty variance (quantifying unobserved circuit heterogeneity)
+  - Frame as sensitivity analysis, not standalone model (only 13 clusters)
+  - Preparation: read coxme documentation, review RISK-H4 (frailty with 13 clusters)
+- **After Task 7**: Checkpoint 1 — adversarial code review of all scripts (01-08)
+### Open Issues
+- **Stale prose in results.tex**: 7 `% TODO: REWRITE PROSE` markers remain. Will be addressed in Tasks 11-12.
+- **timeROC iid=TRUE**: Still needed before final run (Task 16).
+- **Cross-script data derivation duplication**: 03, 04, 07 all independently construct df_ext. Not blocking.
+- **Narrow-window IPTW (1993-1998)**: Execution plan mentions this as supplementary analysis. Not yet implemented. Could strengthen quasi-experimental interpretation but may have too few pre-PSLRA cases. Defer to robustness or future work.
+- **Second Circuit anomaly**: Settlement HR is extreme (5-17x lower than other circuits). Not investigated yet. Deferred.
+- **PH violations in weighted models**: Substantially worse than unweighted. Piecewise IPTW not implemented. Thesis should discuss this as a limitation or implement piecewise IPTW as a robustness check (adds complexity to an already complex section).
+---
