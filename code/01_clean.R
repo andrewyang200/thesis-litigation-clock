@@ -110,19 +110,25 @@ stopifnot(
     all(df_cohort$disp %in% 0:20, na.rm = TRUE)
 )
 cat("  Disposition code validation: PASSED (all codes in 0-20)\n")
+n_na_disp <- sum(is.na(df_cohort$disp))
+if (n_na_disp > 0) {
+  cat(sprintf("  WARNING: %d cases have NA disposition (will be coded as censored)\n", n_na_disp))
+} else {
+  cat("  No NA dispositions found\n")
+}
 
 
 # =============================================================================
 # SECTION 4: THREE DISPOSITION CODING SCHEMES
 # =============================================================================
-# Source: FJC IDB Codebook (fjc_disposition_manual.pdf)
+# Source: FJC IDB Codebook (docs/fjc_codebook.md)
 #
 # Scheme A (Primary):
 #   Settlement: Code 13
 #   Dismissal:  Codes 2 (want of prosecution), 3 (lack of jurisdiction),
 #               4 (default judgment), 6 (judgment on motion), 12 (voluntary),
-#               14 (judgment: court trial), 15 (judgment: jury trial),
-#               17 (judgment: directed), 18 (judgment: other), 19 (dismissal: other)
+#               14 (other dismissal), 15 (award of arbitrator),
+#               17 (other judgment), 18 (statistical closing), 19 (appeal affirmed, magistrate)
 #
 # Scheme B (Liberal):  Reclassify Code 12 (voluntary) -> settlement (hidden settlements)
 # Scheme C (Expanded): Scheme B + Code 5 (consent judgment) -> settlement
@@ -152,7 +158,7 @@ code_events <- function(df, scheme = "A") {
         disp == 4                              ~ 2L,   # Default judgment -> dismissal
         TRUE                                   ~ 0L    # Censored
       ),
-      scheme = scheme
+      coding_scheme = scheme
     )
 }
 

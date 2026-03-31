@@ -30,6 +30,13 @@ cat(sprintf("  Circuits with >= 50 cases: %d of %d\n",
             length(circuits_incl), n_distinct(df$circuit)))
 
 # Circuit-level dataset (reference = Circuit 2 / Second Circuit)
+# Reference level rationale: The Second Circuit (SDNY) is the dominant venue
+# for securities litigation by volume, so all other circuits are compared to
+# the jurisdiction that handles the most securities class actions. This is
+# standard in securities litigation empirics. Note: Circuit 2 is an outlier on
+# the settlement dimension (lowest settlement hazard) — this means all other
+# circuits show HR > 1 for settlement, which readers should interpret as
+# "relative to the most restrictive settlement venue."
 df_circ <- df %>%
   filter(circuit %in% circuits_incl) %>%
   mutate(circuit_f = relevel(factor(circuit), ref = "2"))
@@ -92,11 +99,61 @@ cat("Dismissal:\n");  print(cox.zph(cox_d_base))
 
 
 # =============================================================================
+# SECTION 1B: TIME-TREND SENSITIVITY (filing_year alongside post_pslra)
+# =============================================================================
+cat("\n-----------------------------------------------------------------\n")
+cat("TIME-TREND SENSITIVITY: Does PSLRA survive when linear time is controlled?\n")
+cat("-----------------------------------------------------------------\n")
+
+# The post_pslra indicator is collinear with calendar time: pre = 1990-1995,
+# post = 1996-2024. A skeptic could argue the "PSLRA effect" is merely a
+# secular time trend. This model includes filing_year as a continuous covariate
+# to absorb linear temporal trends, testing whether the PSLRA step-change
+# remains significant beyond any smooth time drift.
+cox_s_time <- coxph(
+  Surv(duration_years, event_type == 1) ~ post_pslra + filing_year,
+  data = df
+)
+cox_d_time <- coxph(
+  Surv(duration_years, event_type == 2) ~ post_pslra + filing_year,
+  data = df
+)
+
+cat("\nTime-Trend Cox — Settlement:\n")
+print(summary(cox_s_time))
+
+cat("\nTime-Trend Cox — Dismissal:\n")
+print(summary(cox_d_time))
+
+# Compare: does adding filing_year change the PSLRA HR materially?
+cat("\n--- PSLRA HR Comparison: Baseline vs Time-Adjusted ---\n")
+cat(sprintf("  Settlement — Baseline HR: %.3f | Time-Adjusted HR: %.3f\n",
+            exp(coef(cox_s_base)["post_pslra"]),
+            exp(coef(cox_s_time)["post_pslra"])))
+cat(sprintf("  Dismissal  — Baseline HR: %.3f | Time-Adjusted HR: %.3f\n",
+            exp(coef(cox_d_base)["post_pslra"]),
+            exp(coef(cox_d_time)["post_pslra"])))
+
+
+# =============================================================================
 # SECTION 2: PIECEWISE TIME-VARYING PSLRA EFFECT
 # =============================================================================
 cat("\n-----------------------------------------------------------------\n")
 cat("PIECEWISE PSLRA EFFECT ON DISMISSAL (time-varying)\n")
 cat("-----------------------------------------------------------------\n")
+
+# Cutpoint justification: The 1-year and 2-year boundaries are chosen on
+# institutional grounds, not data-driven selection:
+#   0-1 years: Corresponds to the motion-to-dismiss phase. Under the PSLRA's
+#              heightened pleading standard (15 U.S.C. §78u-4(b)), defendants
+#              must move to dismiss within ~60 days; judicial resolution of
+#              these motions typically occurs within 6-12 months of filing.
+#   1-2 years: The discovery and class certification phase. Cases surviving
+#              the initial motion enter merits discovery.
+#   2+ years:  Settlement negotiation and trial preparation. Cases reaching
+#              this stage have cleared the major procedural hurdles.
+# These cutpoints align with well-documented litigation milestones in the
+# securities class action lifecycle (see e.g., Cox et al. 2009).
 
 df_split <- survSplit(
   Surv(duration_years, event_type == 2) ~ .,
@@ -262,6 +319,57 @@ print(round(exp(int_coefs_d), 3))
 
 
 # =============================================================================
+# SECTION 6: REFERENCE CIRCUIT SENSITIVITY TEST
+# =============================================================================
+cat("\n-----------------------------------------------------------------\n")
+cat("REFERENCE CIRCUIT SENSITIVITY: Circuit 7 (median volume) vs Circuit 2\n")
+cat("-----------------------------------------------------------------\n")
+
+# The Second Circuit is a settlement outlier (lowest settlement hazard by far).
+# If the choice of reference level is manufacturing the results, switching to a
+# median-volume circuit (Circuit 7, Seventh Circuit, n=535) should change the
+# post_pslra coefficient. If post_pslra is stable, the result is reference-robust.
+
+df_ext_c7 <- df_ext %>%
+  mutate(circuit_f = relevel(factor(circuit), ref = "7"))
+
+cox_s_ext_c7 <- coxph(
+  as.formula(paste("Surv(duration_years, event_type==1) ~", ext_formula_rhs)),
+  data = df_ext_c7
+)
+cox_d_ext_c7 <- coxph(
+  as.formula(paste("Surv(duration_years, event_type==2) ~", ext_formula_rhs)),
+  data = df_ext_c7
+)
+
+cat("\n--- post_pslra HR: Reference Circuit 2 vs Circuit 7 ---\n")
+cat(sprintf("  Settlement — Ref=Cir2: HR=%.3f (p=%.1e) | Ref=Cir7: HR=%.3f (p=%.1e)\n",
+            exp(coef(cox_s_ext)["post_pslra"]),
+            summary(cox_s_ext)$coefficients["post_pslra", "Pr(>|z|)"],
+            exp(coef(cox_s_ext_c7)["post_pslra"]),
+            summary(cox_s_ext_c7)$coefficients["post_pslra", "Pr(>|z|)"]))
+cat(sprintf("  Dismissal  — Ref=Cir2: HR=%.3f (p=%.1e) | Ref=Cir7: HR=%.3f (p=%.1e)\n",
+            exp(coef(cox_d_ext)["post_pslra"]),
+            summary(cox_d_ext)$coefficients["post_pslra", "Pr(>|z|)"],
+            exp(coef(cox_d_ext_c7)["post_pslra"]),
+            summary(cox_d_ext_c7)$coefficients["post_pslra", "Pr(>|z|)"]))
+
+# Compare MDL coefficient (should be identical — it's not circuit-dependent)
+# MDL flag name may vary (mdl_flagTRUE vs mdl_flag1 etc), so grep for it
+cat("\n--- Other key covariates (should be identical across reference levels) ---\n")
+mdl_nm <- grep("mdl", names(coef(cox_s_ext)), value = TRUE)
+if (length(mdl_nm) == 1) {
+  cat(sprintf("  MDL flag — Ref=Cir2: %.3f | Ref=Cir7: %.3f (settlement)\n",
+              exp(coef(cox_s_ext)[mdl_nm]), exp(coef(cox_s_ext_c7)[mdl_nm])))
+  cat(sprintf("  MDL flag — Ref=Cir2: %.3f | Ref=Cir7: %.3f (dismissal)\n",
+              exp(coef(cox_d_ext)[mdl_nm]), exp(coef(cox_d_ext_c7)[mdl_nm])))
+}
+
+cat("\n  VERDICT: If post_pslra HRs match across reference levels,\n")
+cat("  the choice of reference circuit does not manufacture the result.\n")
+
+
+# =============================================================================
 # SAVE MODEL OBJECTS (for 07_diagnostics.R)
 # =============================================================================
 cat("\n-----------------------------------------------------------------\n")
@@ -276,6 +384,9 @@ cox_results <- list(
   # Baseline
   cox_s_base    = cox_s_base,
   cox_d_base    = cox_d_base,
+  # Time-trend sensitivity
+  cox_s_time    = cox_s_time,
+  cox_d_time    = cox_d_time,
   # Piecewise
   cox_piecewise   = cox_piecewise,
   cox_piecewise_s = cox_piecewise_s,

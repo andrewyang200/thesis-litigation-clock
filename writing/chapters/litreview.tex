@@ -37,7 +37,7 @@ incidence estimates \citep{putter2007}. Two approaches address
 this rigorously. Cause-specific hazard models estimate separate
 hazards for each event type, treating competing events as
 censored at the time of the competing event; this yields a
-clean causal interpretation of instantaneous risk but does not
+clean conditional interpretation of instantaneous risk among cases still at risk but does not
 directly estimate absolute outcome probabilities. Fine-Gray
 subdistribution hazard models directly parameterize the
 cumulative incidence function (CIF) for each outcome, allowing
@@ -58,6 +58,69 @@ on bankruptcy case durations \citep{dinterman2021,
 dewaelheyns2009}. To our knowledge, no prior work has applied
 a full competing-risks framework to federal securities class
 actions using large-scale administrative data.
+
+\subsection{Composition Adjustment and Unobserved Heterogeneity}
+
+Two methodological extensions are central to this thesis:
+propensity-score re-weighting for composition adjustment,
+and shared frailty models for unobserved clustering.
+
+Inverse probability of treatment weighting (IPTW) uses a
+propensity score---the estimated probability of receiving
+treatment given observed covariates---to re-weight
+observations so that the treated and control groups are
+balanced on measured characteristics
+\citep{xieliu2005}. In survival settings, IPTW-weighted
+Kaplan-Meier and Cox estimators can recover treatment-specific
+survival curves and hazard ratios that adjust for confounding
+by observed covariates. \citet{austinfine2025} extend IPTW
+to competing-risks settings, demonstrating that weighted
+Aalen-Johansen estimators and IPTW-weighted cause-specific
+Cox models can recover unbiased cumulative incidence
+estimates under standard causal assumptions---assumptions
+whose applicability to observational legal settings requires
+careful scrutiny, as we discuss next.
+
+A critical distinction applies to our setting. Standard IPTW
+assumes that treatment assignment is influenced by observed
+covariates---as when physicians select patients for a drug
+based on clinical characteristics \citep{austinfine2025}.
+The PSLRA, however, is a legislative date cutoff: every case
+filed after December~22, 1995 is ``treated.'' The propensity
+score therefore models temporal changes in case composition
+(e.g., shifts in circuit filing patterns or statutory basis
+mix across eras), not a selection mechanism into treatment.
+We accordingly interpret our IPTW-weighted estimates as
+\emph{composition-adjusted}---isolating the PSLRA component
+from concurrent changes in the observable case mix---rather
+than as causally identified treatment effects. The
+no-unmeasured-confounding assumption is implausible over a
+34-year study window spanning major economic cycles, evolving
+judicial attitudes, and shifts in SEC enforcement intensity.
+
+Shared frailty models address a different source of bias:
+unobserved heterogeneity within clusters. When cases filed
+in the same judicial circuit share latent characteristics---local
+judicial norms, bench expertise, or litigation culture---that
+are not captured by observed covariates, standard Cox
+estimates that pool across circuits may be biased
+\citep{ruetenbudde2019}. A shared frailty model introduces
+a circuit-level random effect (the ``frailty'') that captures
+this unobserved clustering. \citet{ruetenbudde2019} develop
+competing-risks frailty models for multicenter clinical data,
+where center-level frailties capture institutional
+heterogeneity in baseline risk---directly analogous to
+modeling unobserved jurisdictional variation across federal
+circuits. \citet{frevent2024} extend this framework to
+spatially correlated frailties, treating geographic units
+as clusters with shared latent risk factors.
+
+With only 13 federal circuits (some containing very few
+securities cases), frailty variance estimates carry
+substantial uncertainty. We therefore present frailty
+results as a sensitivity analysis alongside cluster-robust
+standard errors, rather than as a standalone modeling
+framework.
 
 \section{Empirical Landscape of Securities Class Actions}
 
@@ -119,8 +182,8 @@ Other determinants include merit signals (accounting
 restatements, SEC investigations), statutory basis
 (Section~11 versus Section~10(b) claims), and forum variation
 across federal circuits \citep{johnson2001, perino2003}.
-Wang et al.\ (2022) find that law firm market share affects
-case outcomes and settlement patterns \citep{wang2022}.
+\citet{wang2022} find that law firm market share affects
+case outcomes and settlement patterns.
 Furthermore, multidistrict litigation (MDL) consolidation represents a
 distinct procedural pathway that concentrates large numbers
 of related cases before a single judge. Yet, the current 
@@ -135,10 +198,9 @@ bias inherent in conditioning on a single outcome type.
 
 \subsection{Prior Use of Survival Methods}
 
-While survival methods are rare in this domain, Brochet and 
-Srinivasan (2014) analyze settlement speed using Cox proportional 
-hazards models conditional on cases that eventually settle 
-\citep{brochet2014}. This approach fundamentally mischaracterizes 
+While survival methods are rare in this domain, \citet{brochet2014}
+analyze settlement speed using Cox proportional hazards models
+conditional on cases that eventually settle. This approach fundamentally mischaracterizes 
 the data generating process. Because dismissals systematically tend 
 to occur earlier in litigation than settlements, treating dismissed 
 cases as right-censored---mathematically implying they remain at 
@@ -149,9 +211,9 @@ hazard ratios.
 To our knowledge, no prior work has applied a full 
 competing-risks framework to federal securities class actions using 
 population-level administrative data to correct these distortions, 
-and none has combined cause-specific hazards, Fine-Gray subdistribution 
-models, and a machine learning benchmark within a unified predictive
-evaluation framework.
+and none has combined cause-specific hazards, Fine-Gray subdistribution
+models, and propensity-score composition adjustment within a unified
+analytical framework.
 
 \section{Federal Court Administrative Data}
 
@@ -207,7 +269,11 @@ duration \citep{cox2008, johnson2001}. None estimate joint
 cause-specific hazard functions, subdistribution hazards, and
 cumulative incidence curves for settlement and dismissal while
 properly accounting for censoring and the mutually exclusive
-nature of outcomes.
+nature of outcomes. Furthermore, no prior study has attempted
+to disentangle the PSLRA's legislative effect from concurrent
+changes in case composition using propensity-score methods, nor
+has any modeled unobserved circuit-level heterogeneity through
+shared frailty specifications in this litigation context.
 
 This thesis fills the gap by producing the first formal
 estimates of: (i) 12-, 24-, and 36-month cumulative incidence
@@ -217,6 +283,12 @@ quantifying how the PSLRA, statutory basis, case origin, MDL
 status, and jurisdictional basis affect the instantaneous risk
 and marginal probability of each outcome; (iii) whether the
 PSLRA effect on dismissal hazard varies over litigation
-duration and across circuits; and (iv) whether a nonparametric
-machine learning benchmark improves upon semi-parametric models
-in discriminating litigation outcomes.
+duration and across circuits; (iv) whether a propensity-score
+composition adjustment isolates the PSLRA component from
+concurrent changes in the observable case mix
+\citep{xieliu2005, austinfine2025}; and (v) whether
+circuit-level shared frailty models reveal unobserved
+jurisdictional heterogeneity beyond what fixed-effect
+covariates capture \citep{ruetenbudde2019}. The following
+chapter formalizes the statistical framework used to pursue
+these five objectives.

@@ -109,7 +109,7 @@ fig_cif <- ggplot(cif_overall_df, aes(x = time, y = prob, color = outcome)) +
   geom_step(linewidth = 1.2) +
   scale_x_continuous(limits = c(0, 8), breaks = seq(0, 8, 2)) +
   scale_y_continuous(limits = c(0, 1), labels = percent_format(accuracy = 1)) +
-  scale_color_manual(values = c("Settlement" = "#1B7837", "Dismissal" = "#B2182B")) +
+  scale_color_manual(values = thesis_colors[c("Settlement", "Dismissal")]) +
   labs(
     title    = "Cumulative Incidence of Settlement vs. Dismissal",
     subtitle = "Aalen-Johansen estimates under competing-risks framework",
@@ -157,10 +157,10 @@ fig_pslra <- ggplot(cif_pslra_df,
   scale_x_continuous(limits = c(0, 8), breaks = seq(0, 8, 2)) +
   scale_y_continuous(limits = c(0, 1), labels = percent_format(accuracy = 1)) +
   scale_color_manual(values = c(
-    "Pre-PSLRA \u2014 Settlement"  = "#1B7837",
+    "Pre-PSLRA \u2014 Settlement"  = "#2166AC",
     "Pre-PSLRA \u2014 Dismissal"   = "#B2182B",
-    "Post-PSLRA \u2014 Settlement" = "#74C476",
-    "Post-PSLRA \u2014 Dismissal"  = "#FC8D59"
+    "Post-PSLRA \u2014 Settlement" = "#67A9CF",
+    "Post-PSLRA \u2014 Dismissal"  = "#EF8A62"
   )) +
   scale_linetype_manual(values = c(
     "Pre-PSLRA \u2014 Settlement"  = "solid",

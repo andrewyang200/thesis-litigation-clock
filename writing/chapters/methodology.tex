@@ -64,10 +64,11 @@ non-missing IDB fields):
     equal to 1 if the case invokes federal question
     jurisdiction (IDB \texttt{juris} code~3).
     \item $\text{StatBasis}_i \in \{\text{10(b)},
-    \text{Section~11}, \text{Other/Both}\}$: statutory basis
-    coded from the IDB \texttt{section} field. A binary
-    missingness indicator $\text{StatBasisMiss}_i$ is included
-    in all models to preserve the full estimation sample.
+    \text{Section~11}, \text{Other/Both}, \text{Missing}\}$:
+    statutory basis coded from the IDB \texttt{section} field.
+    Cases with missing statutory basis are coded as an explicit
+    ``Missing'' factor level rather than dropped, preserving
+    the full estimation sample.
 \end{itemize}
 
 \section{Nonparametric Estimation of Cumulative Incidence}
@@ -92,7 +93,17 @@ where $d_{kj}$ is the number of type-$k$ events at $t_j$ \citep{aalen1978}. We p
 
 \subsection{Cause-Specific Cox Proportional Hazards Models}
 
-The \emph{cause-specific hazard} for event type $k$ is defined as:
+The Cox model relates each case characteristic to its effect on
+the speed of resolution, holding all other factors constant. The
+key output is the \emph{hazard ratio} (HR): for a binary covariate
+such as PSLRA, a hazard ratio of 1.62 means that, at any point in
+time, post-PSLRA cases face a 62\% higher instantaneous rate of
+that event compared to pre-PSLRA cases, conditional on other
+covariates. $\text{HR} > 1$ indicates an accelerated event rate;
+$\text{HR} < 1$ indicates a suppressed rate; and $\text{HR} = 1$
+indicates no association.
+
+Formally, the \emph{cause-specific hazard} for event type $k$ is defined as:
 \begin{equation}
 \lambda_k(t \mid \mathbf{X}) = \lim_{\Delta t \to 0} \frac{P(t \leq T < t + \Delta t, \delta = k \mid T \geq t, \mathbf{X})}{\Delta t}
 \end{equation}
@@ -123,10 +134,9 @@ and $\boldsymbol{\gamma}_k$ is the subdistribution log-hazard ratio vector. Unli
 The baseline models include only PSLRA and circuit. Extended specifications add origin category, MDL flag, jurisdictional basis, and statutory basis. The extended model linear predictor is:
 \begin{align}
 \eta_i ={}& \beta_1 \text{PSLRA}_i + \boldsymbol{\beta}_{\text{circ}}^\top \mathbf{C}_i + \boldsymbol{\beta}_{\text{orig}}^\top \mathbf{O}_i \notag \\
-&+ \beta_4 \text{MDLFlag}_i + \beta_5 \text{JurisFQ}_i \notag \\
-&+ \boldsymbol{\beta}_{\text{stat}}^\top \mathbf{S}_i + \beta_6 \text{StatBasisMiss}_i
+&+ \beta_4 \text{MDLFlag}_i + \beta_5 \text{JurisFQ}_i + \boldsymbol{\beta}_{\text{stat}}^\top \mathbf{S}_i
 \end{align}
-where $\mathbf{C}_i$, $\mathbf{O}_i$, and $\mathbf{S}_i$ are indicator vectors for circuit, origin category, and statutory basis respectively, and $\eta_i$ enters the hazard as $\lambda_k(t \mid \mathbf{X}_i) = \lambda_{0k}(t)\exp(\eta_i)$.
+where $\mathbf{C}_i$, $\mathbf{O}_i$, and $\mathbf{S}_i$ are indicator vectors for circuit, origin category, and statutory basis (including a ``Missing'' level) respectively, and $\eta_i$ enters the hazard as $\lambda_k(t \mid \mathbf{X}_i) = \lambda_{0k}(t)\exp(\eta_i)$.
 
 \subsection{PSLRA $\times$ Circuit Interaction}
 
@@ -152,7 +162,7 @@ where $g$ indexes strata and $\boldsymbol{\beta}_k$ is estimated jointly across 
 \begin{equation}
 \lambda_2(t \mid \text{PSLRA}, \mathbf{X}) = \lambda_{02}(t) \exp \left( \sum_{m=1}^{3} \beta_{2m} \left( \text{PSLRA} \cdot \mathbf{1}_{I_m}(t) \right) + \boldsymbol{\beta}_{\text{other}}^\top \mathbf{X} \right)
 \end{equation}
-where $I_1 = [0,1)$, $I_2 = [1,2)$, and $I_3 = [2,\infty)$. Proportional hazards assumption violations in circuit, origin, MDL, and statutory basis in the extended models are documented in Section~5.4 and addressed via stratification where feasible; full time-varying coefficient models for these variables are deferred to the final thesis.
+where $I_1 = [0,1)$, $I_2 = [1,2)$, and $I_3 = [2,\infty)$. Proportional hazards assumption violations in circuit, origin, MDL, and statutory basis in the extended models are documented in Section~5.5 and addressed via stratification where feasible; full time-varying coefficient models for these covariates are a natural extension of this framework.
 
 \section{Robustness and Sensitivity Analyses}
 
@@ -177,6 +187,177 @@ Cox models separately within the Second and Ninth Circuits to
 assess whether pooled estimates mask circuit-level
 heterogeneity.
 
+\subsection{Temporal Identification and Placebo Validation}
+\label{sec:temporal_id}
+
+Because the PSLRA indicator is perfectly collinear with
+calendar time, the baseline PSLRA hazard ratio may conflate
+the reform's legislative effect with secular trends in
+judicial behavior. A na\"ive linear control for
+$\text{FilingYear}_i$ forces 34~years of non-linear judicial
+drift into a single slope, absorbing the PSLRA step-change
+and producing spurious results. We instead implement three
+complementary identification strategies.
+
+\textbf{Natural spline time-trend control.} We add a natural
+cubic spline basis for filing year with three degrees of
+freedom, $\text{ns}(\text{FilingYear}_i, df{=}3)$, to the
+cause-specific Cox model alongside $\text{PSLRA}_i$. The
+spline flexibly captures non-linear secular trends---such as
+evolving judicial attitudes or shifts in filing
+composition---while preserving the discrete step-change at
+the PSLRA cutoff. We report the variance inflation factor
+(VIF) for PSLRA in this specification to quantify the degree
+of remaining collinearity.
+
+\textbf{Clean-window analysis.} We restrict the sample to
+cases filed between 1993 and 1998---a narrow window
+surrounding the PSLRA's December~22, 1995 effective
+date---and re-estimate the baseline PSLRA Cox model without
+any time-trend controls. The narrow window minimizes secular
+confounding while preserving sufficient sample size for
+estimation.
+
+\textbf{Placebo cutoff test.} As a falsification check, we
+construct a placebo ``law'' at January~1, 1992---a date with
+no legislative significance---and re-estimate the Cox model
+on the pre-PSLRA sample only (1990--1995). A significant
+placebo effect would indicate that the model detects
+pre-existing trends, casting doubt on the PSLRA
+identification; an insignificant placebo effect strengthens
+the case that the estimated PSLRA hazard ratio reflects
+the reform itself rather than secular drift.
+
+\section{Composition Adjustment via Propensity-Score Weighting}
+\label{sec:iptw}
+
+The Cox models in Section~3.3 estimate associations between
+covariates and hazard rates. However, the pre- and post-PSLRA
+case populations may differ systematically in composition---for
+example, in the distribution of filing circuits, statutory
+bases, or case origins---and these compositional shifts could
+confound the estimated PSLRA effect. To isolate the PSLRA
+component from concurrent changes in the observable case mix,
+we employ inverse probability of treatment weighting (IPTW)
+\citep{xieliu2005, austinfine2025}.
+
+\subsection{Propensity Score Estimation}
+
+Let $Z_i \in \{0,1\}$ denote the PSLRA indicator. The
+propensity score is:
+\begin{equation}
+e(\mathbf{X}_i) = P(Z_i = 1 \mid \mathbf{X}_i)
+\end{equation}
+estimated via logistic regression of $Z_i$ on observed case
+characteristics (circuit, origin, jurisdictional basis, and
+statutory basis). Because the PSLRA is a legislative date
+cutoff---not a treatment influenced by case characteristics---the
+propensity score models \emph{temporal changes in case
+composition} across eras, not a selection mechanism into
+treatment.
+
+\subsection{ATT Weighting}
+
+We target the average treatment effect on the treated (ATT)
+estimand, which re-weights the smaller pre-PSLRA control group
+to match the covariate distribution of post-PSLRA cases. The
+ATT weights are:
+\begin{equation}
+w_i =
+\begin{cases}
+1 & \text{if } Z_i = 1 \text{ (post-PSLRA)} \\[4pt]
+\dfrac{\hat{e}(\mathbf{X}_i)}{1 - \hat{e}(\mathbf{X}_i)} & \text{if } Z_i = 0 \text{ (pre-PSLRA)}
+\end{cases}
+\end{equation}
+ATT is preferred over the average treatment effect (ATE)
+because the 11.6:1 post-to-pre sample imbalance would produce
+extreme ATE weights. We trim weights at the 99th percentile
+to limit the influence of extreme propensity scores and report
+the effective sample size (ESS) as a measure of information
+loss from weighting.
+
+\subsection{Weighted Cox Models and Diagnostics}
+
+The composition-adjusted hazard ratio is obtained from a
+weighted cause-specific Cox model:
+\begin{equation}
+\lambda_k(t \mid Z_i) = \lambda_{0k}(t) \exp(\beta_k^{\text{w}} Z_i)
+\end{equation}
+where each observation contributes to the partial likelihood
+with weight $w_i$ and robust (sandwich) standard errors account
+for the estimated weights \citep{xieliu2005}. We implement a
+four-strategy triangulation:
+\begin{enumerate}
+    \item \textbf{Unadjusted}: PSLRA only, no covariates, no weights.
+    \item \textbf{Regression-adjusted}: Extended Cox (PSLRA + all
+    covariates), no weights.
+    \item \textbf{Doubly robust}: Extended Cox with IPTW weights.
+    \item \textbf{Marginal structural}: PSLRA only, with IPTW weights.
+\end{enumerate}
+Convergence of results across strategies provides evidence of
+functional-form robustness. Balance is assessed using
+standardized mean differences (SMD), with $|\text{SMD}| < 0.1$
+as the threshold for adequate balance \citep{austinfine2025}.
+
+\subsection{Interpretive Scope}
+
+We interpret IPTW-weighted hazard ratios as
+\emph{composition-adjusted} estimates that isolate the PSLRA
+component from observable shifts in case composition. We do
+\emph{not} interpret them as causal effects. The
+no-unmeasured-confounding assumption is implausible over a
+34-year window: economic cycles, SEC enforcement intensity,
+judicial attitudes, and plaintiff bar strategies all evolved
+concurrently with the PSLRA and are not captured in the IDB.
+Furthermore, some IPTW covariates (circuit filing patterns,
+statutory basis mix) may themselves be post-treatment
+consequences of the PSLRA, complicating the causal
+interpretation even under ideal conditions.
+
+\section{Shared Frailty Models for Circuit-Level Heterogeneity}
+\label{sec:frailty}
+
+The Cox models in Section~3.3 treat circuit as a fixed effect,
+estimating a separate hazard ratio for each circuit relative
+to a reference. This approach captures \emph{observed}
+circuit-level variation but cannot account for unobserved
+institutional factors---local judicial norms, bench expertise
+in securities law, or district-level procedural culture---that
+induce correlation among cases within the same circuit
+\citep{ruetenbudde2019}.
+
+A shared frailty model introduces a circuit-level random
+effect. Let $u_c$ denote the frailty for circuit $c$, with
+$u_c \sim \text{LogNormal}(0, \theta)$, where $\theta$ is
+the frailty variance. The cause-specific hazard becomes:
+\begin{equation}
+\lambda_k(t \mid \mathbf{X}_i, u_{c(i)}) = u_{c(i)} \cdot \lambda_{0k}(t) \exp(\boldsymbol{\beta}_k^\top \mathbf{X}_i)
+\end{equation}
+where $c(i)$ is the circuit of case $i$. The frailty $u_c$
+acts as a multiplicative shift on the baseline hazard: circuits
+with $u_c > 1$ have uniformly higher event rates, and those
+with $u_c < 1$ have lower rates, after conditioning on
+covariates.
+
+The frailty variance $\theta$ quantifies the degree of
+unobserved circuit heterogeneity. A large $\theta$ indicates
+that circuits differ substantially in ways not captured by
+observed covariates; $\theta \approx 0$ implies that
+fixed-effect covariates adequately account for between-circuit
+variation. We estimate frailty models using
+\texttt{coxme::coxme()} with a \texttt{(1|circuit)} random
+effect for both settlement and dismissal outcomes.
+
+With only 11 circuits containing $\geq 50$ securities cases,
+frailty variance estimates carry inherent uncertainty.
+We therefore present frailty results as a sensitivity analysis
+and pair them with cluster-robust standard errors (obtained via
+\texttt{coxph(\ldots, cluster = circuit)}) as the primary
+robustness check for within-circuit correlation. The informative
+comparison is whether the PSLRA hazard ratio changes
+meaningfully between fixed-effect and random-effect
+specifications.
+
 \section{Model Comparison and Performance Metrics}
 
 \subsection{Concordance Index}
@@ -187,8 +368,7 @@ agrees with observed event ordering \citep{harrell1982}:
 \begin{equation}
 C = \frac{\sum_{i \neq j} I(T_i < T_j, \delta_i \neq 0) \cdot I(\widehat{\text{risk}}_i > \widehat{\text{risk}}_j)}{\sum_{i \neq j} I(T_i < T_j, \delta_i \neq 0)}
 \end{equation}
-where $C = 0.5$ is random ordering and $C = 1.0$ is perfect
-discrimination.
+where $\widehat{\text{risk}}_i = \hat{\boldsymbol{\beta}}^\top \mathbf{X}_i$ is the linear predictor (risk score) from the fitted model, $C = 0.5$ is random ordering, and $C = 1.0$ is perfect discrimination.
 
 \subsection{Time-Dependent AUC}
 
@@ -207,37 +387,44 @@ against the observed event status:
 \begin{equation}
 \text{BS}_k(t) = \frac{1}{n} \sum_{i=1}^n \widehat{W}_i(t) \left( Y_{ik}(t) - \hat{F}_k(t \mid \mathbf{X}_i) \right)^2
 \end{equation}
-where $Y_{ik}(t) = I(T_i \leq t, \delta_i = k)$ is the binary indicator that event $k$ occurred prior to time $t$, and $\widehat{W}_i(t)$ represents the IPCW weights derived from the Kaplan-Meier estimate of the censoring distribution $\hat{G}(t)$. The integrated Brier score averages $\text{BS}_k(t)$ over a grid of evaluation times. IBS computation encountered a technical issue in the current implementation and is deferred to the final thesis; C-index and AUC provide sufficient discrimination characterization for the interim report.
+where $Y_{ik}(t) = I(T_i \leq t, \delta_i = k)$ is the binary indicator that event $k$ occurred prior to time $t$, and $\widehat{W}_i(t)$ represents the IPCW weights derived from the Kaplan-Meier estimate of the censoring distribution $\hat{G}(t)$. The integrated Brier score averages $\text{BS}_k(t)$ over a grid of evaluation times.
 
 \subsection{Validation Strategy}
 
 We partition the analysis sample into a 70\% training set and
 30\% test set, stratified by PSLRA regime, yielding 9,005
-training cases and 3,861 test cases. All models are fit on
-training data. All C-index and AUC values reported in
-Chapter~\ref{ch:results} are computed on the held-out test set.
-Fine-Gray C-index values reported in Chapter~\ref{ch:results}
-are computed independently using the Fine-Gray model's linear
-predictor (the subdistribution hazard score), which differs from
+training cases and 3,861 test cases. Predictive models (Cox
+and Fine-Gray) are fit on training data; all C-index and AUC
+values reported in Chapter~\ref{ch:results} are computed on the
+held-out test set. Fine-Gray C-index values are computed
+independently using the Fine-Gray model's linear predictor
+(the subdistribution hazard score), which differs from
 the cause-specific Cox linear predictor. Because
 \texttt{survival::concordance()} treats competing events as
 censored rather than maintaining them in the risk set as the
 Fine-Gray model does, the reported Fine-Gray C-index is an
 approximation.
 
-\section{Unobserved Heterogeneity and Limitations}
+IPTW and frailty models use the \emph{full} analysis sample
+without train/test splitting, because their purpose is
+compositional adjustment and heterogeneity quantification,
+not prediction. Their diagnostics are covariate balance
+(standardized mean differences and effective sample size for
+IPTW) and frailty variance (for shared frailty models), not
+C-index or AUC.
 
-Our models assume that observed covariates capture the
-relevant dimensions of case heterogeneity. Unobserved
-factors---case-specific merit signals, judge-level
+\section{Limitations of the Modeling Framework}
+
+All models condition on observed administrative covariates.
+Unobserved factors---case-specific merit signals (stock price
+drops, accounting restatements, SEC investigations), judge-level
 characteristics, law firm quality, and the magnitude of
 alleged investor losses---may influence both the probability
-and timing of outcomes. Frailty models could account for
-unobserved heterogeneity via random effects, but the IDB
-lacks consistent judge identifiers necessary to define
-meaningful clusters, and frailty estimation in
-competing-risks contexts with limited cluster sizes is
-computationally challenging. We interpret all hazard ratios
-as conditional on observed covariates and rely on the breadth
-of our robustness checks to bound the range of plausible
-estimates.
+and timing of outcomes. Finer-grained clustering at the judge
+level is infeasible because the IDB lacks consistent judge
+identifiers. We interpret all hazard ratios as associations
+conditional on observed covariates and rely on the breadth
+of our robustness checks---including IPTW composition
+adjustment, shared frailty models, alternative disposition
+coding schemes, and time-trend controls---to bound the range
+of plausible estimates.

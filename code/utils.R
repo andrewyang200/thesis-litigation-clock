@@ -69,12 +69,12 @@ save_table <- function(tbl, filename, caption = "", label = "") {
 
 # --- Data Helpers ---
 # Standard event coding (Scheme A — primary analysis)
-# Source: FJC IDB Codebook (fjc_disposition_manual.pdf)
+# Source: FJC IDB Codebook (docs/fjc_codebook.md)
 #   Settlement: Code 13 (settlement)
 #   Dismissal:  Codes 2 (want of prosecution), 3 (lack of jurisdiction),
 #               4 (default judgment), 6 (judgment on motion), 12 (voluntary),
-#               14 (judgment: court trial), 15 (judgment: jury trial),
-#               17 (judgment: directed), 18 (judgment: other), 19 (dismissal: other)
+#               14 (other dismissal), 15 (award of arbitrator),
+#               17 (other judgment), 18 (statistical closing), 19 (appeal affirmed, magistrate)
 #   Censored:   Everything else (transfers, remands, pending)
 # NOTE: Schemes B and C reclassify codes 12 and 5 — see code/01_clean.R::code_events()
 code_event <- function(disposition) {

@@ -50,30 +50,55 @@ databases frequently misclassify voluntary dismissals, masking
 ``hidden settlements'' and distorting true resolution probabilities 
 \citep{scales2024}.
 
-This thesis addresses these gaps through three core contributions. 
-\textbf{First, in methods:} this is, to our knowledge, the first 
-application of a full competing-risks survival framework to federal 
-securities class actions using population-level administrative data. 
-We characterize litigation duration nonparametrically using 
-Aalen-Johansen cumulative incidence functions (CIFs), and estimate 
+This thesis addresses these gaps through four core contributions.
+\textbf{First, in methods:} this is, to our knowledge, the first
+application of a full competing-risks survival framework to federal
+securities class actions using population-level administrative data.
+We characterize litigation duration nonparametrically using
+Aalen-Johansen cumulative incidence functions (CIFs), estimate
 both cause-specific Cox proportional hazards and Fine-Gray
-subdistribution models.
+subdistribution models, and move beyond purely associational
+estimates through propensity-score composition adjustment and
+shared frailty models.
 
-\textbf{Second, in findings:} we provide the first rigorous
-estimates of how the PSLRA, circuit practices, case origin, 
-multidistrict litigation (MDL) status, and statutory basis jointly 
-shape the hazard and cumulative incidence of settlement versus dismissal. 
-While existing work documents that the PSLRA increased early dismissal 
-rates \citep{johnson2001, cox2008, cheng2010}, our competing-risks 
-analysis quantifies exactly how this effect varies over litigation 
-duration, systematically differing across circuits, and how MDL 
-consolidation bilaterally suppresses both competing hazards.
+\textbf{Second, in identification:} we apply inverse probability
+of treatment weighting (IPTW) to isolate the PSLRA component
+from concurrent changes in the observable case mix---the first
+such application of propensity-score re-weighting to securities
+litigation outcomes. Because the PSLRA is a legislative date
+cutoff rather than a treatment influenced by case characteristics,
+we interpret the weighted estimates as composition-adjusted
+rather than causally identified, and we complement them with
+circuit-level shared frailty models that quantify unobserved
+jurisdictional heterogeneity.
 
-\textbf{Third, in data:} we confront and mitigate the well-documented 
-challenges inherent to the Federal Judicial Center's Integrated 
-Database (IDB) \citep{clermont2002, alexander1991}. We address the 
-ambiguity of disposition codes through composite case identification 
-strategies and rigorous sensitivity analyses under alternative outcome 
-coding schemes. Ultimately, we demonstrate that the structural breaks 
-identified in our survival models are highly robust to these underlying 
-administrative measurement errors.
+\textbf{Third, in findings:} we isolate the PSLRA's effect from
+over 30~years of non-linear judicial drift, demonstrating
+that the Act operates as a persistent accelerant of dismissal
+hazard. Across seven robustness specifications---including
+alternative disposition coding schemes, temporal restrictions,
+circuit sub-samples, and flexible spline time-trend
+controls---the PSLRA dismissal hazard ratio ranges from 1.28
+to 1.94, with the composition-adjusted IPTW estimate at
+approximately 1.53 (a 53\% increase in the instantaneous
+rate of dismissal). The PSLRA is also associated with
+settlement suppression in the baseline specification (HR $=
+0.378$), though this effect attenuates and loses statistical
+significance under flexible time-trend controls, suggesting
+that part of the raw settlement association reflects secular
+changes in litigation patterns. We further quantify how the
+PSLRA effect varies over litigation duration and across
+circuits, how MDL consolidation bilaterally suppresses both
+competing hazards, and how a 1992 placebo cutoff test reveals
+pre-existing trends that reinforce our decision to frame all
+estimates as associational or composition-adjusted rather than
+causally identified.
+
+\textbf{Fourth, in data:} we confront and mitigate the
+well-documented challenges inherent to the Federal Judicial
+Center's Integrated Database (IDB) \citep{clermont2002,
+alexander1991}. We address the ambiguity of disposition codes
+through rigorous sensitivity analyses under three alternative
+outcome coding schemes and demonstrate that the structural
+patterns identified in our survival models are robust to
+these underlying administrative measurement uncertainties.

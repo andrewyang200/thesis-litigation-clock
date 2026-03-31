@@ -4,7 +4,15 @@
       "Bash(python3 -c \":*)",
       "Bash(pip3 install:*)",
       "Bash(git status:*)",
-      "Bash(Rscript -e 'library\\(timeROC\\); x <- timeROC\\(T=c\\(1,2,3,4,5\\), delta=c\\(0,1,2,1,0\\), marker=c\\(0.1,0.5,0.3,0.8,0.2\\), cause=1, times=c\\(1,2,3\\), iid=FALSE\\); cat\\(\"\"\"\"Names:\"\"\"\", paste\\(names\\(x\\), collapse=\"\"\"\", \"\"\"\"\\), \"\"\"\"\\\\n\"\"\"\"\\); cat\\(\"\"\"\"AUC:\"\"\"\", x$AUC, \"\"\"\"\\\\n\"\"\"\"\\); cat\\(\"\"\"\"AUC_1:\"\"\"\", if\\(!is.null\\(x$AUC_1\\)\\) x$AUC_1 else \"\"\"\"NULL\"\"\"\", \"\"\"\"\\\\n\"\"\"\"\\); cat\\(\"\"\"\"AUC_2:\"\"\"\", if\\(!is.null\\(x$AUC_2\\)\\) x$AUC_2 else \"\"\"\"NULL\"\"\"\", \"\"\"\"\\\\n\"\"\"\"\\)')"
+      "Bash(Rscript -e 'library\\(timeROC\\); x <- timeROC\\(T=c\\(1,2,3,4,5\\), delta=c\\(0,1,2,1,0\\), marker=c\\(0.1,0.5,0.3,0.8,0.2\\), cause=1, times=c\\(1,2,3\\), iid=FALSE\\); cat\\(\"\"\"\"Names:\"\"\"\", paste\\(names\\(x\\), collapse=\"\"\"\", \"\"\"\"\\), \"\"\"\"\\\\n\"\"\"\"\\); cat\\(\"\"\"\"AUC:\"\"\"\", x$AUC, \"\"\"\"\\\\n\"\"\"\"\\); cat\\(\"\"\"\"AUC_1:\"\"\"\", if\\(!is.null\\(x$AUC_1\\)\\) x$AUC_1 else \"\"\"\"NULL\"\"\"\", \"\"\"\"\\\\n\"\"\"\"\\); cat\\(\"\"\"\"AUC_2:\"\"\"\", if\\(!is.null\\(x$AUC_2\\)\\) x$AUC_2 else \"\"\"\"NULL\"\"\"\", \"\"\"\"\\\\n\"\"\"\"\\)')",
+      "Bash(tee /tmp/diag_output_v2.txt)",
+      "Bash(while ! grep -q \"COMPLETE\" /tmp/diag_output_v2.txt)",
+      "Bash(do sleep:*)",
+      "Bash(done)",
+      "Bash(until grep:*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(for script:*)",
+      "Bash(do echo:*)"
     ]
   }
 }

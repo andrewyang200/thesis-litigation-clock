@@ -6,8 +6,8 @@ This chapter presents the full empirical results of our
 competing-risks survival analysis. We proceed from
 nonparametric characterization of litigation duration and
 outcomes, through progressively richer covariate-adjusted
-models, to robustness checks and machine learning
-benchmarking. The organizing question throughout is: how do
+models, to robustness checks and model diagnostics.
+The organizing question throughout is: how do
 the PSLRA, circuit geography, and case-level structural
 characteristics jointly shape the timing and probability of
 settlement versus dismissal?
@@ -174,8 +174,8 @@ empirical signature of the Southern District of New York.
 Table~\ref{tab:cox_baseline} presents baseline cause-specific
 Cox models. Post-PSLRA cases have a 62\% lower settlement
 hazard (HR $= 0.378$, 95\% CI: 0.337--0.424) and a 64\%
-higher dismissal hazard (HR $= 1.638$, 95\% CI:
-1.478--1.815). The Grambsch-Therneau test fails to reject
+higher dismissal hazard (HR $= 1.415$, 95\% CI:
+1.301--1.540). The Grambsch-Therneau test fails to reject
 proportional hazards for settlement ($p = 0.12$) but
 strongly rejects for dismissal ($p = 0.0001$), motivating
 the piecewise analysis in Section~\ref{sec:piecewise}.
@@ -201,15 +201,15 @@ Dismissal  & 1.415 & (1.301, 1.540) & $<$0.001 & $<$0.001 \\
 Table~\ref{tab:piecewise} presents the piecewise constant
 dismissal hazard model. The temporal decomposition reveals
 a three-phase PSLRA effect. In the first year, post-PSLRA
-cases face more than double the dismissal hazard of
-pre-PSLRA cases (HR $= 2.18$): the PSLRA's heightened
+cases face an 86\% higher dismissal hazard than
+pre-PSLRA cases (HR $= 1.859$, 95\% CI: 1.607--2.150): the PSLRA's heightened
 pleading requirements and automatic discovery stay
 concentrate dismissals at the pleading stage. In years one
-to two, the PSLRA effect vanishes entirely (HR $= 0.922$,
-$p = 0.444$): cases that survived the first-year gauntlet
+to two, the PSLRA effect vanishes entirely (HR $= 1.044$,
+$p > 0.05$): cases that survived the first-year gauntlet
 face no differential dismissal risk. For cases surviving
 beyond two years, a modest but significant PSLRA effect
-re-emerges (HR $= 1.55$).
+re-emerges (HR $= 1.293$, 95\% CI: 1.132--1.477).
 
 \begin{table}[htb]
 \centering
@@ -230,7 +230,7 @@ re-emerges (HR $= 1.55$).
 This three-phase pattern---strong early effect, null
 middle-period effect, modest late re-emergence---is the
 first formal empirical documentation of the PSLRA's
-time-varying causal signature using a piecewise survival
+time-varying empirical signature using a piecewise survival
 framework on population-level data.
 
 % TODO: REWRITE PROSE — Numbers changed by Code 6 reclassification
@@ -428,7 +428,7 @@ Dismissal  & Post-PSLRA & 1.736 & 1.915 \\
 \end{tabular*}
 \begin{minipage}{\textwidth}
 \vskip 4pt
-\footnotesize \textit{Note:} CS = cause-specific hazard ratio; FG = Fine-Gray subdistribution hazard ratio. CS models treat competing events as censored, while FG models account for the reduced "at-risk" pool.
+\footnotesize \textit{Note:} CS = cause-specific hazard ratio; FG = Fine-Gray subdistribution hazard ratio. CS models treat competing events as censored (removing them from the risk set), while FG models retain subjects who experienced competing events in the risk set with IPCW weights, so that coefficients relate directly to cumulative incidence.
 \end{minipage}
 \end{table}
 
@@ -441,12 +441,12 @@ the cause-specific model holds the competing risk fixed.
 
 The MDL comparison is more analytically revealing. Despite
 the dramatically lower cause-specific settlement hazard (HR
-$= 0.262$), the Fine-Gray subdistribution effect on
-settlement is essentially null (SHR $= 0.963$). The
+$= 0.261$), the Fine-Gray subdistribution effect on
+settlement is modestly positive (SHR $= 1.126$). The
 reconciliation is that MDL cases also have very low dismissal
 hazard: because MDL cases rarely get dismissed, the pool
 available to settle remains large throughout, and cumulative
-settlement probability is not substantially lower than for
+settlement probability is actually slightly \emph{higher} than for
 non-MDL cases despite the lower instantaneous rate. This
 result is invisible to single-outcome analyses.
 
@@ -471,23 +471,24 @@ highly restrictive baseline settlement environment, leaving less
 room for the PSLRA to further suppress settlement probabilities 
 relative to more plaintiff-friendly venues. 
 
-For dismissal, the most striking interaction is in the Eleventh 
-Circuit (interaction HR $= 0.426$), indicating strong attenuation 
-of the PSLRA's baseline positive effect on dismissals. The Ninth 
-Circuit shows a slight amplification (HR $= 1.052$). These patterns 
-are consistent with documented variation in judicial application of 
-the ``strong inference'' scienter pleading standard across circuits 
-\citep{johnson2001, choi2007}.
+For dismissal, the most striking interaction is in the Eleventh
+Circuit (interaction HR $= 0.376$), indicating strong attenuation
+of the PSLRA's baseline positive effect on dismissals. The Ninth
+Circuit shows substantial attenuation (HR $= 0.703$), suggesting
+the PSLRA's dismissal amplification was weaker in that jurisdiction.
+These patterns are consistent with documented variation in judicial
+application of the ``strong inference'' scienter pleading standard
+across circuits \citep{johnson2001, choi2007}.
 
 % TODO: REWRITE PROSE — Numbers changed by Code 6 reclassification
 \section{Robustness Checks}
 
 Figure~\ref{fig:robustness} and Table~\ref{tab:robustness}
-present PSLRA hazard ratios from six distinct Cox models.
+present PSLRA hazard ratios from seven distinct Cox models.
 Across every specification, settlement HRs are below 1 and
 dismissal HRs are above 1. The direction of the PSLRA effect
-is not an artifact of any particular coding or sampling
-choice.
+is not an artifact of any particular coding, sampling, or
+time-trend specification.
 
 \begin{figure}[htb]
     \centering
@@ -523,11 +524,14 @@ Second Circuit only     & Settlement & 0.794 & (0.396, 1.590) & 0.515    \\
 \addlinespace[0.5em]
 Ninth Circuit only      & Settlement & 0.771 & (0.629, 0.944) & 0.012    \\
                         & Dismissal  & 1.740 & (1.520, 2.010) & $<$0.001 \\
+\addlinespace[0.5em]
+Time-trend (spline)     & Settlement & 0.748 & (0.543, 1.030) & 0.076    \\
+                        & Dismissal  & 1.940 & (1.590, 2.360) & $<$0.001 \\
 \bottomrule
 \end{tabular*}
 \end{table}
 
-Three observations warrant emphasis. First, Scheme~B and~C
+Four observations warrant emphasis. First, Scheme~B and~C
 estimates for settlement (HR $\approx 0.69$--$0.70$) are
 larger than Scheme~A (HR $= 0.378$), as expected when
 Code~12 cases are reclassified as settlements. Even so, the
@@ -539,10 +543,52 @@ main results. Third, the Second Circuit sub-model yields a
 non-significant PSLRA effect on settlement hazard ($p =
 0.515$): within the Second Circuit, the PSLRA did not
 significantly alter settlement dynamics, though it did
-significantly increase the dismissal hazard (HR $= 1.68$).
+significantly increase the dismissal hazard (HR $= 1.770$).
 The Ninth Circuit, by contrast, shows a significant PSLRA
-effect on both outcomes, with a dismissal HR of 2.34 that
-substantially exceeds the pooled estimate.
+effect on both outcomes, with a dismissal HR of 1.740 that
+exceeds the pooled estimate. Fourth, the spline time-trend
+control is the strongest identification test: after flexibly
+absorbing non-linear secular trends in judicial behavior via
+a natural cubic spline ($df{=}3$), the PSLRA dismissal HR
+\emph{increases} to 1.940 ($p < 0.001$), confirming that the
+PSLRA effect is not a calendar-time artifact. The settlement
+HR attenuates to 0.748 and loses significance ($p = 0.076$)
+under the spline specification, indicating that some of the
+raw settlement suppression is confounded with secular trends.
+
+\subsection{Temporal Identification and Placebo Results}
+
+To further probe whether the PSLRA dismissal effect reflects
+the reform itself or pre-existing trends, we implement the
+identification strategies described in
+Section~\ref{sec:temporal_id}.
+
+\textbf{Clean-window analysis (1993--1998).} Restricting the
+sample to a narrow six-year window surrounding the PSLRA's
+effective date and estimating without time-trend controls
+yields a dismissal HR of 1.378 ($p < 0.001$). The effect is
+attenuated relative to the full-sample baseline (1.415) and
+the spline estimate (1.940), as expected in a restricted
+window with less statistical power, but it remains
+significant and directionally consistent.
+
+\textbf{Placebo cutoff test (1992).} As a falsification
+check, we construct a placebo ``law'' at January~1, 1992 and
+re-estimate the Cox model on the pre-PSLRA sample only
+(1990--1995). The placebo produces a significant dismissal HR
+of 0.710 ($p < 0.001$), indicating that the model detects
+pre-existing trends in dismissal rates during the early
+1990s even in the absence of any legislative change. This
+result has two implications. First, it reinforces the
+importance of flexible time-trend controls: a simple
+before-after comparison, even in a narrow window, may
+partially reflect secular judicial drift rather than the
+reform alone. Second, it strengthens our decision to frame
+all estimates as associational or composition-adjusted rather
+than causally identified. The PSLRA's effect is robust and
+substantial across specifications, but the pre-existing trend
+detected by the placebo test precludes a clean causal
+attribution to the reform in isolation.
 
 \subsection{Model Comparison: Discrimination Performance}
 
@@ -571,28 +617,40 @@ Fine-Gray (Dismissal)  & 0.566 & 0.548 & 0.597 & 0.746 \\
 \end{minipage}
 \end{table}
 
-% TODO: REWRITE PROSE — Numbers changed by Code 6 reclassification
 \section{Summary of Results}
 
-Our analysis yields six main findings. First, the PSLRA
-fundamentally restructured securities litigation outcomes,
-with effects robust to all disposition coding schemes,
-temporal restrictions, and extended covariate controls.
+Our analysis yields seven main findings. First, the PSLRA is
+a persistent accelerant of dismissal hazard, with the
+dismissal HR ranging from 1.28 to 1.94 across seven
+robustness specifications and a composition-adjusted IPTW
+estimate of approximately 1.53. This finding is robust to
+all disposition coding schemes, temporal restrictions,
+circuit sub-samples, and flexible spline time-trend controls.
 Second, the PSLRA's impact on dismissal hazard is
-concentrated in the first year (HR $= 2.18$), vanishes in
-year two (HR $= 0.922$, $p = 0.444$), and re-emerges
-modestly thereafter (HR $= 1.55$). Third, circuit geography
+concentrated in the first year (HR $= 1.859$), vanishes in
+year two (HR $= 1.044$, $p > 0.05$), and re-emerges
+modestly thereafter (HR $= 1.293$). Third, circuit geography
 is the dominant predictor of case outcomes in both
 parametric and nonparametric frameworks, with the Second
 Circuit exhibiting anomalously low settlement hazard and
 the highest dismissal incidence. Fourth, the PSLRA's effects
-are heterogeneous across circuits, with the reform's settlement 
-suppression being weakest in the Second Circuit and its dismissal 
-amplification strongly attenuated in the Eleventh Circuit. 
-Fifth, MDL consolidation suppresses both cause-specific hazards, 
-but Fine-Gray analysis reveals no lower cumulative settlement 
-probability---a result invisible to single-outcome analyses. 
-Sixth, the semi-parametric Cox model currently achieves strong 
-out-of-sample discrimination (Settlement C-Index = 0.735), 
-establishing a rigorous baseline that the final scaled machine 
-learning models must overcome.
+are heterogeneous across circuits, with the reform's settlement
+suppression being weakest in the Second Circuit and its dismissal
+amplification strongly attenuated in the Eleventh Circuit.
+Fifth, MDL consolidation suppresses both cause-specific hazards,
+but Fine-Gray analysis reveals a modestly \emph{higher} cumulative
+settlement probability (SHR $= 1.126$)---a result invisible to
+single-outcome analyses.
+Sixth, the PSLRA's association with settlement suppression
+(baseline HR $= 0.378$) is robust to alternative disposition
+coding but attenuates to 0.748 ($p = 0.076$) under flexible
+time-trend controls, indicating that part of the raw
+settlement effect reflects secular changes in litigation
+patterns. A 1992 placebo cutoff test detecting significant
+pre-existing trends ($p < 0.001$) further limits causal
+attribution and reinforces our compositional framing.
+Seventh, the semi-parametric Cox model achieves moderate
+out-of-sample discrimination for settlement (C-Index = 0.735)
+but weaker discrimination for dismissal (C-Index = 0.593),
+suggesting that unobserved case-merit factors play a larger
+role in dismissal outcomes.

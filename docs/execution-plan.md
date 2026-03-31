@@ -416,7 +416,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### CHECKPOINT 1 [REVIEW]: Adversarial Code Review
-- [ ] IN PROGRESS — 05 and 06 audited; 01-04, 08 still pending
+- [x] COMPLETE (2026-03-31) — All 8 scripts audited. HOWEVER: "Dismissal Flip" debunked in session 2026-03-31b. A FINAL adversarial re-audit of the full pipeline (01-08) is required before Phase 3 writing resumes.
 
 **WHAT**: Run `/project:challenge` targeting ALL code scripts (`code/01_clean.R` through `code/08_robustness.R`). Specifically challenge:
 - Statistical correctness of IPTW implementation (correct weight construction, correct SE estimation)
@@ -440,7 +440,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### Task 8 [EXTEND]: Update Literature Review + Add New Sources
-- [ ] Not started
+- [ ] DRAFT-IN-REVIEW — Auto-accepted but must be restarted from scratch with corrected context (no flip, honest settlement hedge, placebo failure)
 
 **WHAT**:
 1. Add 4 new references from `docs/new_lit_sources.txt` to `refs.bib`
@@ -468,7 +468,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### Task 9 [EXTEND]: Rewrite Methodology Chapter
-- [ ] Not started
+- [ ] DRAFT-IN-REVIEW — Auto-accepted but needs re-review with corrected context. Temporal Identification subsection added but not yet reviewed.
 
 **WHAT**:
 1. **Add plain-English hazard ratio definition** before the first equation — one paragraph explaining what a HR means intuitively ("a hazard ratio of 1.62 means that, at any point in time, post-PSLRA cases face a 62% higher instantaneous rate of dismissal compared to pre-PSLRA cases, holding other factors constant")
@@ -500,7 +500,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### Task 10 [FIX]: Rewrite Introduction
-- [ ] Not started
+- [ ] DRAFT-IN-REVIEW — Auto-accepted but rewritten twice. Current version has honest HR range [1.28-1.94], IPTW ≈1.53 headline, settlement hedge, placebo mention. Needs final review.
 
 **WHAT**: Reframe the Introduction around composition-adjusted inference:
 1. Replace contribution (iv) — currently RSF — with IPTW composition-adjusted analysis

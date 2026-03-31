@@ -331,3 +331,181 @@ Read this FIRST at the start of every session (via /project:plan).
 - **Cross-script data derivation duplication**: 03, 04, 07 independently construct df_ext. Not blocking but could cause inconsistency if one script changes.
 - **Previous deferred issues**: narrow-window IPTW, Second Circuit anomaly (now confirmed by frailty BLUP=-1.70), PH violations in weighted models.
 ---
+
+## Session: 2026-03-30 (Checkpoint 1 continued — Scripts 03/07 audit + Surgical Strike)
+### Plan Progress
+- Tasks completed this session: Checkpoint 1 audit of 03_cox_models.R and 07_diagnostics.R. Major "surgical strike" fixing identification defense, stale numbers, and propensity score sync.
+- Current position in plan: Checkpoint 1 IN PROGRESS (4 of 8 scripts audited: 03, 05, 06, 07). Remaining: 01, 02, 04, 08.
+- Plan modifications needed: Major new finding — the "Dismissal Flip" changes the thesis narrative. When filing_year is added as time-trend control, dismissal HR reverses from 1.415 to 0.598. This is now a central thesis finding that must be prominently written into Results/Discussion (Tasks 11-12).
+### Completed
+- **Adversarial audit of 03_cox_models.R and 07_diagnostics.R**: bug-finder + devil's advocate agents. Initial verdict: NEEDS WORK.
+- **Identification Defense** (03_cox_models.R):
+  - Added Section 1B: Time-Trend Sensitivity model with `filing_year` covariate
+  - Key result: Settlement HR strengthens (0.378→0.330), Dismissal HR **reverses** (1.415→0.598) — the "Dismissal Flip"
+  - VIF=1.33, SE inflation=1.14x — not a collinearity artifact
+  - Added piecewise cutpoint justification comments
+  - Added Circuit 2 reference level rationale comment
+  - Added Section 6: Reference Circuit Sensitivity Test (Circuit 7 as median) — post_pslra HR invariant to reference choice
+  - Saved time-trend models in cox_results list
+- **07_diagnostics.R hardening**:
+  - Changed all 4 `iid=FALSE` to `iid=TRUE` in timeROC calls
+  - Added AUC CI extraction function with sanity checks
+  - Fixed AUC/CI definition pairing bug: `AUC_1` must pair with `CI_AUC_1` (not `CI_AUC_2`)
+  - `CI_AUC_1`/`CI_AUC_2` are AUC *definitions*, not cause numbers
+  - CIs converted from percentage to proportion (confint.timeROC returns ×100)
+  - Data leakage audit: confirmed clean train/test split
+- **08_robustness.R**: Added 7th specification (time-trend control + filing_year), updated forest plot
+- **05_propensity_scores.R sync**: Dropped mdl_flag, collapsed origin "Removed" — now matches 05_causal_iptw.R exactly
+- **Thesis text fixes** (results.tex, discussion.tex, methodology.tex, litreview.tex):
+  - "causal signature" → "empirical signature"
+  - 9th Circuit interaction: 1.052 → 0.703 (direction reversal)
+  - 11th Circuit interaction: 0.426 → 0.376
+  - MDL Fine-Gray SHR: 0.963 → 1.126
+  - "machine learning benchmarking" → "model diagnostics"
+  - C-index language: "strong" → "moderate"
+  - Frailty impossibility paragraph replaced with implemented frailty description
+  - RSF/ML references cleaned from litreview.tex
+- **Fine-Gray time-trend sync**: FG dismissal also flips (SHR 1.863→0.976, p=0.51). Settlement survives.
+- **Multicollinearity verified**: Manual VIF=1.33 (car package not installed)
+### Key Decisions
+- **"Dismissal Flip" is real, not collinearity**: VIF=1.33 is benign, SE inflation only 1.14x, z=-10.49 is massively significant. The raw dismissal HR=1.415 was confounded with a secular time trend of increasing dismissals. After controlling for filing_year, PSLRA actually *reduces* dismissal hazard (HR=0.598).
+- **Fine-Gray confirms the flip**: SHR goes from 1.863 to 0.976 (p=0.51) — completely null. No structural contradiction.
+- **Three-tier language enforced**: "associated with" (Cox), "after compositional adjustment" (IPTW), never "causally attributable"
+- **AUC definition alignment rule**: `get_auc()` returns `AUC_1` (definition 1), so CIs must come from `CI_AUC_1`. The subscript refers to the IPCW weighting definition, not the cause number.
+### Next Steps
+- Complete Checkpoint 1: audit remaining scripts 01_clean.R, 02_descriptives.R, 04_fine_gray.R, 08_robustness.R
+- After Checkpoint 1, proceed to Phase 3: Chapter Reconstruction (Tasks 8-13)
+### Open Issues
+- **Checkpoint 1 incomplete**: 4 scripts remain (01, 02, 04, 08)
+- **"Dismissal Flip" needs thesis integration**: LaTeX anchor placed but actual prose restructure deferred to Tasks 11-12
+- **7 `% TODO: REWRITE PROSE` markers** in results.tex still pending (Tasks 11-12)
+- **timeROC iid=TRUE now set** — memory updated to RESOLVED
+- **Previous deferred issues**: narrow-window IPTW, PH violations in weighted models
+---
+
+## Session: 2026-03-30 (Checkpoint 1 COMPLETE — All 8 scripts audited)
+### Plan Progress
+- Tasks completed this session: Checkpoint 1 audit of remaining 4 scripts (01, 02, 04, 08). All fixes applied and verified. Checkpoint 1 is now CLOSED.
+- Current position in plan: Checkpoint 1 COMPLETE. Ready for Phase 3: Task 8 (Update Literature Review).
+- Plan modifications needed: Fine-Gray now has PH testing and time-trend sensitivity. New finding: FG dismissal goes completely null (SHR=0.969, p=0.40) with filing_year, confirming Cox dismissal flip in both frameworks.
+### Completed
+- **Ran 8 adversarial agents** (4 bug-finders + 4 devil's advocates) on scripts 01, 02, 04, 08
+  - Total: 2 critical, 13 medium, 15 low across 125+ items checked
+  - Devil's advocate: 9 survived, 19 weakened, 5 broken
+- **Fixed all critical and high-priority issues**:
+  1. Forest plot subtitle: "direction is consistent" → "Settlement suppression is robust; dismissal reverses under time-trend control" (08_robustness.R:195)
+  2. Comment labels for codes 14/15/17/18/19 corrected in both 01_clean.R and utils.R to match FJC codebook
+  3. Added Fine-Gray PH test (Section 4 in 04_fine_gray.R): Settlement global chi-sq=282.9, Dismissal global chi-sq=1553.3. Both violated (similar to Cox).
+  4. Added Fine-Gray time-trend sensitivity (Section 5 in 04_fine_gray.R): Settlement SHR=0.822 (survives), Dismissal SHR=0.969 (null). Confirms Cox flip.
+  5. Refactored 08_robustness.R time-trend models — eliminated redundant fitting, added tryCatch protection
+  6. Standardized color palette: Settlement now uses thesis_colors blue (#2166AC) everywhere (was green in 02 and 08)
+  7. Added NA disposition diagnostic to 01_clean.R (0 NAs found)
+  8. Updated header documentation in 08_robustness.R
+- All 3 modified scripts re-run successfully: 01_clean.R, 02_descriptives.R, 04_fine_gray.R, 08_robustness.R
+### Key Decisions
+- **Fine-Gray PH violations confirm Cox pattern**: Both frameworks show severe global PH violations (expected with 12k+ cases and a regime change). The thesis must discuss this as a "time-averaged summary" limitation consistently for both Cox and FG.
+- **Fine-Gray time-trend confirms dismissal flip**: FG dismissal SHR goes from ~1.86 to 0.969 (p=0.40) with filing_year — completely null. FG settlement attenuates from 0.410 to 0.822 but remains significant (p=0.004). This strengthens the "settlement suppression is real, dismissal acceleration is confounded" narrative.
+- **Code 18 (statistical closing) flagged**: Devil's advocate raised that Code 18 is an administrative closure of dormant cases, not a substantive dismissal. Deferred as sensitivity analysis for Results chapter (show that reclassifying Code 18 as censored does not change main findings).
+- **Color palette standardized**: All figures now use blue for Settlement, red for Dismissal from utils.R thesis_colors. Old green Settlement colors eliminated.
+### Next Steps
+- **Phase 3: Chapter Reconstruction** — Tasks 8-13
+  - Task 8: Update Literature Review
+  - Task 9: Rewrite Methodology chapter
+  - Task 10: Rewrite Introduction
+  - Task 11-12: Results chapter restructure (this is where the dismissal flip, TODO markers, and prose-table mismatches get resolved)
+  - Task 13: Discussion rewrite
+### Open Issues
+- **Prose-table mismatches in results.tex**: 7 `% TODO: REWRITE PROSE` markers plus CIF horizon numbers don't match prose. All deferred to Tasks 11-12.
+- **Robustness table-figure mismatch**: Forest plot has 7 rows, thesis table has 6 (excludes time-trend). Must sync in Tasks 11-12.
+- **Code 18 sensitivity**: Run a quick check that reclassifying Code 18 (statistical closing) as censored doesn't change main findings. Low priority but would satisfy a careful examiner.
+- **Missing robustness checks flagged by devil's advocate**: placebo test (fake PSLRA date), nonlinear time controls (spline), excluding Second Circuit. Consider adding 1-2 of these if time permits.
+- **No CIF confidence bands or number-at-risk tables**: Would strengthen descriptive figures. Medium priority for Phase 4 polish.
+- **Fine-Gray comparison table**: Cherry-picks 2 covariates, missing CIs. Fix during Tasks 11-12.
+- **Previous deferred issues**: narrow-window IPTW, PH violations in weighted models.
+---
+
+## Session: 2026-03-31 (Final Code Hardening — Pre-Phase 3 Verification)
+### Plan Progress
+- Tasks completed: All 4 user-requested verifications + comprehensive sweep of all remaining issues.
+- Current position: Checkpoint 1 FULLY CLOSED. All code bulletproofed. Ready for Phase 3.
+### Completed
+- **AUC Math Verified (07_diagnostics.R)**: Re-extracted all AUC point estimates and CIs from scratch. All 8 AUC values (4 horizons × 2 models) fall correctly within their CI_AUC_1 confidence intervals. The previous bug (pairing AUC_1 with CI_AUC_2) is confirmed fixed.
+- **Code 18 Sensitivity Test**: 1,198 cases (9.2%) are Code 18 (statistical closings). When reclassified as censored: Dismissal flip survives (HR=0.536, p=2.5e-33), actually strengthens from 0.598. Settlement unchanged (HR=0.330).
+- **Robustness Table/Forest Plot Synced**: Verified .rds has all 7 specs + time-trend model objects. Forest plot regenerated with corrected subtitle and blue/red palette. LaTeX table update (6→7 rows) deferred to Phase 3 Tasks 11-12.
+- **Fine-Gray Comparison Table**: Added extended comparison table with 95% CIs for PSLRA and MDL. Key finding: MDL settlement FG SHR=1.126 [0.795, 1.595], p=0.503 — statistically indistinguishable from null.
+- **Stale Numbers Fixed**: Found and corrected 5 remaining stale inline numbers:
+  - Baseline dismissal HR: 1.638 → 1.415 (results.tex:183)
+  - Piecewise 0-1yr dismissal: 2.18 → 1.859 (results.tex:211, 589; discussion.tex:48)
+  - Piecewise 1-2yr dismissal: 0.922 → 1.044 (results.tex:214; discussion.tex:56)
+  - Piecewise 2+yr dismissal: 1.55 → 1.293 (results.tex:218; discussion.tex:65)
+  - MDL FG SHR: 0.963 → 1.126 with CI (discussion.tex:156)
+- **FG Footnote Fixed**: "reduced at-risk pool" → correctly describes expanded risk set with IPCW weights (results.tex:437)
+- **Additional Code Fixes**:
+  - 04_fine_gray.R: Added tryCatch to all 4 baseline + 4 extended finegray/coxph calls
+  - 04_fine_gray.R: Added event_type validation (stopifnot)
+  - 01_clean.R: Renamed `scheme` column to `coding_scheme` (variable shadowing fix)
+- **Comprehensive Sweep**: Searched all .R and .tex files for stale values, wrong labels, old colors, causal language, iid=FALSE. All clean.
+- **Full Pipeline Verified**: All 8 scripts (01→02→03→04→05→06→07→08) ran end-to-end with zero errors.
+### Key Decisions
+- **Code 18 is not a threat**: Reclassifying Code 18 as censored actually strengthens the dismissal flip (0.598→0.536). The thesis can note this sensitivity result in one sentence in Results/Discussion.
+- **AUC definition pairing is definitively resolved**: AUC_1 ↔ CI_AUC_1 (definition 1). The subscript refers to IPCW weighting definition, NOT cause number. Verified by running from scratch with sanity checks.
+- **MDL FG SHR is not significant**: CI includes 1.0. The "modestly positive" framing should be softened to "statistically indistinguishable from null." Updated in discussion.tex.
+### Next Steps
+- **Phase 3: Chapter Reconstruction (Tasks 8-13)** — All analysis code and numbers are now verified. The remaining work is exclusively writing.
+### Open Issues
+- **7 `% TODO: REWRITE PROSE` markers** in results.tex — Phase 3 Tasks 11-12
+- **Robustness LaTeX table needs 7th row** — Phase 3 Tasks 11-12
+- **"six distinct" → "seven distinct"** in results.tex:493 — Phase 3
+- **CIF confidence bands + number-at-risk tables** — Phase 4 polish
+- **Placebo test** (fake PSLRA date) — would strengthen identification but not required
+---
+
+## Session: 2026-03-31b (Dismissal Flip DEBUNKED + Narrative Correction + Anti-Sycophancy)
+### Plan Progress
+- Tasks completed this session: None fully complete. Tasks 8-10 are DRAFTS-IN-REVIEW (auto-accepted prematurely). Robustness script (08) updated and rerun. Stress test script created.
+- Current position in plan: Between Checkpoint 1 and Phase 3. A FINAL adversarial re-audit of the full pipeline (01-08) is required before Phase 3 writing can officially resume.
+- Plan modifications needed:
+  - **Checkpoint 1 reopened**: The "Dismissal Flip" (HR=0.598) that shaped the 2026-03-30 session's narrative was DEBUNKED by stress tests. All code and prose built on the flip must be verified clean.
+  - **Tasks 8, 9, 10 reset to DRAFT-IN-REVIEW**: These were auto-accepted without adversarial review. They must be restarted from scratch in the next session with corrected context.
+  - **New prerequisite before Phase 3 resumes**: Final Adversarial Challenge on full pipeline (01-08). Audit list: (1) Re-verify 01_clean.R coding logic, (2) ensure no variable shadowing remains, (3) re-verify spline (df=3) vs. 1992 placebo, (4) confirm Code 18 impact, (5) verify 7-row robustness table matches forest plot exactly.
+### Completed
+- **Created `code/verify_dismissal_flip.R`** — Four stress tests that definitively killed the flip:
+  - Step 1 Spline (df=3): Dismissal HR = 1.9404 (p = 4.61e-11) — flip disappears
+  - Step 2 RDD (1993-1998): Dismissal HR = 1.3778 (p = 2.54e-05) — no flip in clean window
+  - Step 3 Placebo (1992): Dismissal HR = 0.7101 (p = 0.0001) — model hallucinates on pre-existing trends (FAIL)
+  - Step 4 IPTW trim sensitivity: MSM HR ≈ 1.53 stable across 90th/95th/99th trims
+- **Updated `code/08_robustness.R`**: Replaced linear `filing_year` with `ns(filing_year, df=3)`. Updated subtitle. Reran — forest plot now shows 7 specs, all dismissal dots right of HR=1.
+- **Purged flip narrative**: Searched all .tex and .R files for "flip|reverses|0.598". Clean in all .tex files. Historical comments remain in verify_dismissal_flip.R (diagnostic script).
+- **Updated results.tex**:
+  - Robustness table: added 7th row (Time-trend spline: Settlement HR=0.748, Dismissal HR=1.940)
+  - Robustness discussion: now 4 observations (was 3), added spline as strongest identification test
+  - NEW subsection "Temporal Identification and Placebo Results": reports clean-window HR=1.378, placebo HR=0.710 (p<0.001), honest discussion of pre-existing trends
+  - Summary of Results: expanded from 6 to 7 findings, new finding #6 confronts settlement attenuation and placebo failure
+  - Fixed pre-existing HR mismatches: Second Circuit 1.68→1.770, Ninth Circuit 2.34→1.740
+- **Updated intro.tex**:
+  - Contribution #3: replaced "approximately doubling" with honest range [1.28, 1.94] and IPTW point estimate ≈1.53
+  - Settlement claim hedged: "attenuates and loses statistical significance under flexible time-trend controls"
+  - Placebo test mentioned: "reinforces our decision to frame all estimates as associational or composition-adjusted"
+- **Updated discussion.tex**:
+  - Settlement robustness paragraph: added time-trend caveat — "robust to disposition coding choices but sensitive to time-trend specification"
+- **Updated execution-plan.md**: Tasks 8-10 marked DRAFT-IN-REVIEW, Checkpoint 1 note updated
+### Key Decisions
+- **"Dismissal Flip" was a linear overfitting artifact**: A linear filing_year forced 34 years of non-linear judicial drift into one slope, absorbing the PSLRA step-change. The spline (df=3) preserves the PSLRA discontinuity while flexibly capturing secular trends → HR returns to 1.94.
+- **Lead with IPTW HR ≈ 1.53, not spline HR ≈ 1.94**: The 1.94 is the highest across all specifications. The honest headline is the composition-adjusted IPTW estimate (1.53, a 53% increase), with the full range [1.28, 1.94] reported. This was an anti-sycophancy correction — I pushed back on leading with the most dramatic number.
+- **Placebo test FAILED and we report it honestly**: The 1992 placebo produced HR=0.710 (p<0.001), detecting pre-existing trends. This limits causal interpretability of all estimates and reinforces the "composition-adjusted, not causal" framing. This is bad news for identification but the thesis is stronger for reporting it.
+- **Settlement finding is weaker than initially claimed**: Under spline control, settlement HR goes from 0.378 (p<0.001) to 0.748 (p=0.076). Part of the raw settlement suppression is confounded with secular trends. The intro and discussion now acknowledge this.
+- **Anti-sycophancy checkpoint triggered**: User challenged me for agreeing with all suggestions. I identified three weak decisions: (1) cherry-picking 1.94 as headline, (2) burying the placebo failure, (3) not hedging the settlement claim. All three were corrected in this session.
+### Next Steps
+- **FIRST ACTION of next session**: Final Adversarial Challenge on full pipeline (01-08). NO PROSE WRITING until analysis is iron-clad.
+  - Audit checklist: (1) 01_clean.R coding logic, (2) no variable shadowing, (3) spline vs. placebo verification, (4) Code 18 exclusion impact, (5) 7-row robustness table matches forest plot exactly
+- **After audit passes**: Restart Task 8 from scratch with updated context (no flip, honest settlement, placebo failure, HR range [1.28-1.94])
+- Tasks 9 and 10 also need fresh review passes with corrected context
+### Open Issues
+- **Tasks 8-10 are DRAFTS-IN-REVIEW**: They were auto-accepted without adversarial review and built partially on the debunked flip narrative. Must be restarted from scratch.
+- **7 `% TODO: REWRITE PROSE` markers** in results.tex — 6 remain (one was resolved when Summary was rewritten)
+- **03_cox_models.R still has linear time-trend section (Section 1B)**: The verify_dismissal_flip.R proved this is misleading. Consider removing or replacing with spline in 03 as well, not just 08.
+- **04_fine_gray.R time-trend section also uses linear filing_year**: Same issue — FG dismissal goes null (SHR=0.969) under linear control, but this was the artifact. Should be re-tested with spline.
+- **Placebo test complicates identification story**: The 1992 placebo detecting pre-existing trends means even the clean-window RDD (1993-1998) is not a pure causal test. The thesis handles this honestly but a committee member could probe further.
+- **CIF confidence bands + number-at-risk tables** — Phase 4 polish
+- **timeROC iid=TRUE** — already set, confirmed in previous session
+---

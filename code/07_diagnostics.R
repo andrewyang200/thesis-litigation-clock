@@ -316,9 +316,8 @@ if (abs(cind_cox_s$concordance - cind_fg_s$concordance) < 1e-6 &&
 
 # =============================================================================
 # SECTION 5: TIME-DEPENDENT AUC
-# TODO: Set iid=TRUE for final thesis run to enable AUC confidence intervals
-#       via confint(). Currently FALSE for speed (~10min vs ~1min with 3.8k obs).
-#       CIs should be added to the performance table in Task 11/12.
+# iid=TRUE enabled: produces AUC confidence intervals via confint().
+# This is slower (~10min vs ~1min with 3.8k obs) but required for final output.
 # =============================================================================
 cat("\n-----------------------------------------------------------------\n")
 cat("TIME-DEPENDENT AUC ON HELD-OUT TEST SET\n")
@@ -335,7 +334,7 @@ troc_cox_s <- tryCatch(
     marker = lp_cox_s,
     cause  = 1,
     times  = time_points,
-    iid    = FALSE
+    iid    = TRUE
   ),
   error = function(e) { cat("  timeROC error (Cox-S):", conditionMessage(e), "\n"); NULL }
 )
@@ -347,7 +346,7 @@ troc_cox_d <- tryCatch(
     marker = lp_cox_d,
     cause  = 2,
     times  = time_points,
-    iid    = FALSE
+    iid    = TRUE
   ),
   error = function(e) { cat("  timeROC error (Cox-D):", conditionMessage(e), "\n"); NULL }
 )
@@ -363,7 +362,7 @@ troc_fg_s <- tryCatch(
     marker = lp_fg_s,
     cause  = 1,
     times  = time_points,
-    iid    = FALSE
+    iid    = TRUE
   ),
   error = function(e) { cat("  timeROC error (FG-S):", conditionMessage(e), "\n"); NULL }
 )
@@ -375,7 +374,7 @@ troc_fg_d <- tryCatch(
     marker = lp_fg_d,
     cause  = 2,
     times  = time_points,
-    iid    = FALSE
+    iid    = TRUE
   ),
   error = function(e) { cat("  timeROC error (FG-D):", conditionMessage(e), "\n"); NULL }
 )
@@ -405,6 +404,45 @@ if (!is.null(troc_fg_d)) {
   cat("  Fine-Gray AUC (Dismissal)  at 1/2/3/5 yr: ",
       paste(round(get_auc(troc_fg_d), 3), collapse = " / "), "\n")
 }
+
+# --- AUC 95% Confidence Intervals (requires iid=TRUE) ---
+# confint.timeROC returns a list with $CI_AUC_1 and $CI_AUC_2, corresponding to
+# AUC definitions 1 and 2 (NOT cause 1 and cause 2). Since get_auc() returns
+# $AUC_1 (definition 1), we always use $CI_AUC_1 for matching CIs.
+# Each CI matrix is [time_points x 2] with columns (lower, upper) on a 0-100 scale.
+cat("\n  --- AUC 95% Confidence Intervals ---\n")
+extract_auc_ci <- function(troc, label) {
+  if (is.null(troc)) { cat(sprintf("  %s: timeROC object is NULL\n", label)); return(NULL) }
+  ci <- tryCatch(confint(troc), error = function(e) {
+    cat(sprintf("  %s: confint failed — %s\n", label, e$message)); NULL
+  })
+  if (is.null(ci)) return(NULL)
+
+  auc_vals <- get_auc(troc)
+  # Always use CI_AUC_1 to match AUC_1 (which get_auc() returns)
+  ci_mat <- ci[["CI_AUC_1"]]
+  if (is.null(ci_mat)) {
+    cat(sprintf("  %s: CI_AUC_1 not found in confint output\n", label)); return(NULL)
+  }
+  # Convert from percentage (0-100) to proportion (0-1)
+  ci_mat <- ci_mat / 100
+
+  # Sanity check: point estimate should fall within CI
+  for (i in seq_along(time_points)) {
+    in_ci <- auc_vals[i] >= ci_mat[i, 1] & auc_vals[i] <= ci_mat[i, 2]
+    low_flag <- if (ci_mat[i, 1] < 0.60) " *** LOW PREDICTIVE POWER ***" else ""
+    san_flag <- if (!in_ci) " !!! SANITY FAIL: AUC outside CI !!!" else ""
+    cat(sprintf("  %s @ %dyr: AUC=%.3f [%.3f, %.3f]%s%s\n",
+                label, time_points[i], auc_vals[i],
+                ci_mat[i, 1], ci_mat[i, 2], low_flag, san_flag))
+  }
+  invisible(ci_mat)
+}
+
+ci_cox_s <- extract_auc_ci(troc_cox_s, "Cox Settlement")
+ci_cox_d <- extract_auc_ci(troc_cox_d, "Cox Dismissal")
+ci_fg_s  <- extract_auc_ci(troc_fg_s,  "FG Settlement")
+ci_fg_d  <- extract_auc_ci(troc_fg_d,  "FG Dismissal")
 
 
 # =============================================================================

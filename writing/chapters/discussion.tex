@@ -44,8 +44,8 @@ characterization to date of how the Private Securities
 Litigation Reform Act of 1995 reshaped the litigation
 landscape. The three-phase temporal decomposition is the
 single most policy-relevant finding in this thesis. In the
-first year, post-PSLRA cases face more than double the
-dismissal hazard of pre-PSLRA cases (HR $= 2.18$). This is
+first year, post-PSLRA cases face an 86\% higher
+dismissal hazard than pre-PSLRA cases (HR $= 1.859$). This is
 the PSLRA's heightened pleading standard and automatic
 discovery stay operating as designed: the ``strong
 inference'' of scienter requirement raises the bar for
@@ -53,16 +53,16 @@ surviving a motion to dismiss, and the discovery stay
 prevents plaintiffs from using early discovery to supplement
 insufficiently pleaded complaints.
 
-The null effect in years one to two (HR $= 0.922$, $p =
-0.444$) is equally important. Cases that survive the
+The null effect in years one to two (HR $= 1.044$, $p >
+0.05$) is equally important. Cases that survive the
 first-year gauntlet face no differential dismissal risk
 compared to pre-PSLRA survivors in the following year. This
 pattern is consistent with the PSLRA acting as a one-time
 filter at the pleading stage: once a case has demonstrated
 sufficient pleading adequacy to survive initial review, the
 reform no longer systematically disadvantages plaintiffs.
-The re-emergence of a positive PSLRA effect beyond two years
-(HR $= 1.55$) may reflect differences in summary judgment
+The re-emergence of a modest PSLRA effect beyond two years
+(HR $= 1.293$) may reflect differences in summary judgment
 practice or a selection effect among long-duration
 post-PSLRA survivors.
 
@@ -78,16 +78,24 @@ cases are caught in the same net---requires merging our
 dataset with settlement amount data and merit proxies, and
 remains an open empirical question.
 
-The robustness analysis provides an important bound on the
-settlement effect. Under the most liberal coding scheme
-(Scheme~B), the PSLRA settlement HR rises from 0.378 to
-0.696, still representing a 30\% reduction in settlement
-hazard. The true effect lies within the interval
-$[0.378, 0.696]$ depending on the fraction of Code~12 cases
-representing private settlements. Even at the upper bound,
-the PSLRA substantially suppressed settlement probability,
-consistent with defendants' reduced incentive to settle
-cases they could credibly dismiss at the pleading stage.
+The robustness analysis provides important bounds on the
+settlement effect, but also reveals a significant caveat.
+Under the most liberal coding scheme (Scheme~B), the PSLRA
+settlement HR rises from 0.378 to 0.696, still representing
+a 30\% reduction in settlement hazard. The true effect lies
+within the interval $[0.378, 0.696]$ depending on the
+fraction of Code~12 cases representing private settlements.
+However, when flexible time-trend controls (a natural spline
+with $df{=}3$) absorb secular changes in judicial behavior,
+the settlement HR attenuates further to 0.748 and loses
+statistical significance ($p = 0.076$). This suggests that
+part of the raw settlement suppression attributed to the
+PSLRA in the baseline specification reflects concurrent
+secular trends in litigation patterns rather than the reform
+alone. The settlement finding is therefore robust to
+disposition coding choices but sensitive to time-trend
+specification, and should be interpreted with appropriate
+caution.
 
 \section{Circuit Heterogeneity and Judicial Geography}
 
@@ -119,8 +127,8 @@ Act's heightened pleading standard interacted with SDNY's
 already-demanding judicial environment.
 
 The Eleventh Circuit's anomalous interaction for dismissal
-(interaction HR $= 0.426$) and the Ninth Circuit's
-amplification (HR $= 1.052$) point to meaningful variation
+(interaction HR $= 0.376$) and the Ninth Circuit's
+attenuation (HR $= 0.703$) point to meaningful variation
 in how district courts applied the PSLRA's ``strong
 inference'' scienter standard. Prior work by Johnson et al.\
 \citep{johnson2001} and Choi \citep{choi2007} has documented
@@ -152,12 +160,12 @@ schedules, global resolution frameworks---that slow
 individual case resolution. The Fine-Gray subdistribution
 analysis complicates this picture in an important way:
 despite the dramatically lower instantaneous hazards, MDL
-cases do not have lower cumulative settlement probability
-(SHR $= 0.963$). Because bilateral suppression of both
+cases show a modestly higher cumulative settlement probability
+(SHR $= 1.126$, 95\% CI $[0.795, 1.595]$, $p = 0.503$). Because bilateral suppression of both
 hazards keeps large numbers of MDL cases in the risk set
 throughout the study period, cumulative settlement
-probability accumulates toward the same long-run level as
-non-MDL cases. This finding would be completely invisible
+probability accumulates to a similar---or slightly higher---level as
+non-MDL cases, though this difference is not statistically significant. This finding would be completely invisible
 to a single-outcome analysis.
 
 Case origin results suggest that removed cases face lower
@@ -185,12 +193,14 @@ how much of the PSLRA's early dismissal effect was driven by the dismissal
 of genuinely meritless claims versus structurally complex but valid claims. 
 
 
-Furthermore, litigation outcomes are highly dependent on the specific 
-judge assigned to the case and the caliber of the law firms involved 
-\citep{wang2022}. Without consistent judge identifiers or attorney data, 
-we cannot implement frailty models to account for this clustering. 
-Consequently, unobserved judicial or counsel quality may confound some 
-of our observed circuit or origin effects. Finally, our reliance on the 
+Furthermore, litigation outcomes are highly dependent on the specific
+judge assigned to the case and the caliber of the law firms involved
+\citep{wang2022}. While we implement circuit-level shared frailty models
+to account for clustering at the circuit level, the IDB lacks consistent
+judge identifiers or attorney data, so finer-grained clustering at the
+judge or counsel level remains unmodeled. Consequently, unobserved
+judicial or counsel quality may confound some of our observed circuit
+or origin effects. Finally, our reliance on the 
 Grambsch-Therneau global tests indicates that proportional hazards 
 assumptions are violated in our extended models; our current estimates 
 must therefore be strictly interpreted as average effects over the study 
