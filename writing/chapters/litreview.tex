@@ -55,15 +55,18 @@ While survival and competing-risks methods are standard in
 clinical trials and labor economics, they remain uncommon in
 empirical studies of civil litigation. Exceptions include work
 on bankruptcy case durations \citep{dinterman2021,
-dewaelheyns2009}. To our knowledge, no prior work has applied
-a full competing-risks framework to federal securities class
-actions using large-scale administrative data.
+dewaelheyns2009}. Applying these methods to securities
+litigation raises two additional methodological challenges:
+separating the effect of a legislative reform from concurrent
+changes in case composition, and accounting for unobserved
+heterogeneity across judicial circuits.
 
 \subsection{Composition Adjustment and Unobserved Heterogeneity}
 
-Two methodological extensions are central to this thesis:
-propensity-score re-weighting for composition adjustment,
-and shared frailty models for unobserved clustering.
+Two methodological extensions augment the core competing-risks
+framework in this thesis: propensity-score re-weighting for
+composition adjustment, and shared frailty models for
+unobserved clustering.
 
 Inverse probability of treatment weighting (IPTW) uses a
 propensity score---the estimated probability of receiving
@@ -75,11 +78,13 @@ Kaplan-Meier and Cox estimators can recover treatment-specific
 survival curves and hazard ratios that adjust for confounding
 by observed covariates. \citet{austinfine2025} extend IPTW
 to competing-risks settings, demonstrating that weighted
-Aalen-Johansen estimators and IPTW-weighted cause-specific
-Cox models can recover unbiased cumulative incidence
-estimates under standard causal assumptions---assumptions
-whose applicability to observational legal settings requires
-careful scrutiny, as we discuss next.
+Aalen-Johansen estimators can recover unbiased cumulative
+incidence estimates and IPTW-weighted cause-specific Cox
+models can recover unbiased hazard ratios, under identifying
+assumptions (no unmeasured confounding, positivity, correct
+propensity-score specification) whose applicability to
+observational legal settings requires careful scrutiny, as
+we discuss next.
 
 A critical distinction applies to our setting. Standard IPTW
 assumes that treatment assignment is influenced by observed
@@ -151,8 +156,8 @@ facts giving rise to a ``strong inference'' of scienter, imposed
 an automatic stay of discovery pending resolution of motions to
 dismiss, and established lead-plaintiff provisions favoring
 institutional investors \citep{johnson2001}. Empirical studies
-have found that the PSLRA increased early dismissal rates for
-cases lacking strong merit signals---such as accounting
+have found that the PSLRA was associated with higher early
+dismissal rates for cases lacking strong merit signals---such as accounting
 restatements, parallel SEC enforcement actions, or insider
 trading allegations---while allowing meritorious cases to
 proceed \citep{johnson2001, choi2007}.
@@ -182,8 +187,8 @@ Other determinants include merit signals (accounting
 restatements, SEC investigations), statutory basis
 (Section~11 versus Section~10(b) claims), and forum variation
 across federal circuits \citep{johnson2001, perino2003}.
-\citet{wang2022} find that law firm market share affects
-case outcomes and settlement patterns.
+\citet{wang2022} find that law firm market share is associated
+with case outcomes and settlement patterns.
 Furthermore, multidistrict litigation (MDL) consolidation represents a
 distinct procedural pathway that concentrates large numbers
 of related cases before a single judge. Yet, the current 
@@ -208,12 +213,10 @@ risk of settling at some unobserved future time---upwardly biases
 the cumulative probability of settlement and distorts covariate 
 hazard ratios. 
 
-To our knowledge, no prior work has applied a full 
-competing-risks framework to federal securities class actions using 
-population-level administrative data to correct these distortions, 
-and none has combined cause-specific hazards, Fine-Gray subdistribution
-models, and propensity-score composition adjustment within a unified
-analytical framework.
+The conditional-on-settlement design thus
+represents the state of the art in survival-based analysis of
+securities litigation---and its fundamental limitation motivates
+the competing-risks framework developed in this thesis.
 
 \section{Federal Court Administrative Data}
 
@@ -224,8 +227,9 @@ federal district courts \citep{fjc_idb_portal, fjc_idb_guide}.
 The IDB contains longitudinal records from approximately 1970
 to the present, capturing filing dates, termination dates,
 nature-of-suit codes, disposition codes, and court identifiers.
-Securities class actions are primarily identified using NOS
-Code~850 (``Securities, Commodities, and Exchange'').
+Securities class actions are primarily identified using
+nature-of-suit (NOS) Code~850 (``Securities, Commodities,
+and Exchange'').
 
 A major challenge is the ambiguity of disposition codes. The
 IDB includes codes for ``Dismissed: Settled'' (Code~13) and
