@@ -42,6 +42,11 @@ cox_results <- readRDS(here::here("output", "models", "cox_models.rds"))
 fg_results  <- readRDS(here::here("output", "models", "fine_gray_models.rds"))
 cat("  Loaded: cox_models.rds, fine_gray_models.rds\n")
 
+# Validate required fields exist (fail fast if .rds is stale)
+stopifnot("cox_models.rds missing 'ext_formula_rhs'" = "ext_formula_rhs" %in% names(cox_results))
+stopifnot("cox_models.rds missing 'circuits_incl'"    = "circuits_incl"   %in% names(cox_results))
+stopifnot("cox_models.rds missing 'include_stat'"     = "include_stat"    %in% names(cox_results))
+
 # Extract metadata
 ext_formula_rhs <- cox_results$ext_formula_rhs
 circuits_incl   <- cox_results$circuits_incl
@@ -379,12 +384,13 @@ troc_fg_d <- tryCatch(
   error = function(e) { cat("  timeROC error (FG-D):", conditionMessage(e), "\n"); NULL }
 )
 
-# Helper to extract AUC from timeROC result.
-# Cause-specific (binary delta) uses $AUC; competing-risks (multi-level delta) uses $AUC_1.
+# Strict AUC extraction: competing-risks delta (0/1/2) always populates $AUC_1.
+# No fallback to $AUC — if $AUC_1 is missing, the delta encoding is wrong and
+# we want a loud failure, not silent degradation.
 get_auc <- function(troc) {
-  if (!is.null(troc$AUC) && length(troc$AUC) > 0) troc$AUC
-  else if (!is.null(troc$AUC_1)) troc$AUC_1
-  else rep(NA_real_, length(time_points))
+  stopifnot("AUC_1 not found — check that delta is multi-level (0/1/2)" =
+              !is.null(troc$AUC_1))
+  troc$AUC_1
 }
 
 cat("\n  --- Time-Dependent AUC Results ---\n")
@@ -452,6 +458,9 @@ cat("\n-----------------------------------------------------------------\n")
 cat("INTEGRATED BRIER SCORE\n")
 cat("-----------------------------------------------------------------\n")
 
+# NOTE: pec/IBS treats competing events as censored (binary Surv(time, ev)),
+# making this a cause-specific approximation, not a true competing-risks metric.
+# This is the standard approach and matches our cause-specific C-index treatment.
 eval_times <- seq(0.25, 5, by = 0.25)
 
 ibs_cox_s <- tryCatch({

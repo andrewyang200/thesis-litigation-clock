@@ -52,24 +52,20 @@ run_pslra_cox <- function(df, label) {
     error = function(e) { cat(sprintf("  Cox error (D, %s): %s\n", label, e$message)); NULL }
   )
 
-  bind_rows(
-    if (!is.null(s)) tibble(
-      Specification = label, Outcome = "Settlement", N = nrow(df),
-      N_events = sum(df$event_type == 1),
-      HR = round(exp(coef(s)[["post_pslra"]]), 3),
-      CI_lower = round(exp(confint(s)["post_pslra", 1]), 3),
-      CI_upper = round(exp(confint(s)["post_pslra", 2]), 3),
-      p_value  = round(summary(s)$coefficients["post_pslra", "Pr(>|z|)"], 4)
-    ),
-    if (!is.null(d)) tibble(
-      Specification = label, Outcome = "Dismissal", N = nrow(df),
-      N_events = sum(df$event_type == 2),
-      HR = round(exp(coef(d)[["post_pslra"]]), 3),
-      CI_lower = round(exp(confint(d)["post_pslra", 1]), 3),
-      CI_upper = round(exp(confint(d)["post_pslra", 2]), 3),
-      p_value  = round(summary(d)$coefficients["post_pslra", "Pr(>|z|)"], 4)
+  extract_row <- function(model, outcome_label) {
+    if (is.null(model)) return(NULL)
+    ci <- tryCatch(confint(model)["post_pslra", ], error = function(e) c(NA, NA))
+    tibble(
+      Specification = label, Outcome = outcome_label, N = nrow(df),
+      N_events = sum(df$event_type == ifelse(outcome_label == "Settlement", 1, 2)),
+      HR = round(exp(coef(model)[["post_pslra"]]), 3),
+      CI_lower = round(exp(ci[1]), 3),
+      CI_upper = round(exp(ci[2]), 3),
+      p_value  = round(summary(model)$coefficients["post_pslra", "Pr(>|z|)"], 4)
     )
-  )
+  }
+
+  bind_rows(extract_row(s, "Settlement"), extract_row(d, "Dismissal"))
 }
 
 
@@ -149,15 +145,18 @@ rob_time <- bind_rows(
 
 # Print detail for the spline model
 cat("\n  --- Time-Trend Sensitivity Detail (Spline df=3) ---\n")
-cat(sprintf("  Settlement: PSLRA HR=%.3f (p=%.1e)\n",
-            exp(coef(s_time)["post_pslra"]),
-            summary(s_time)$coefficients["post_pslra", "Pr(>|z|)"]))
-cat(sprintf("  Dismissal:  PSLRA HR=%.3f (p=%.1e)\n",
-            exp(coef(d_time)["post_pslra"]),
-            summary(d_time)$coefficients["post_pslra", "Pr(>|z|)"]))
-cat("  INTERPRETATION: Natural spline flexibly absorbs non-linear judicial drift.\n")
-cat("  PSLRA HR remaining significant and >1 confirms the step-change is real,\n")
-cat("  not an artifact of secular trends.\n")
+if (!is.null(s_time)) {
+  s_hr <- exp(coef(s_time)["post_pslra"])
+  s_p  <- summary(s_time)$coefficients["post_pslra", "Pr(>|z|)"]
+  cat(sprintf("  Settlement: PSLRA HR=%.3f (p=%.1e) %s\n",
+              s_hr, s_p, ifelse(s_p < 0.05, "[significant]", "[NOT significant]")))
+}
+if (!is.null(d_time)) {
+  d_hr <- exp(coef(d_time)["post_pslra"])
+  d_p  <- summary(d_time)$coefficients["post_pslra", "Pr(>|z|)"]
+  cat(sprintf("  Dismissal:  PSLRA HR=%.3f (p=%.1e) %s\n",
+              d_hr, d_p, ifelse(d_p < 0.05, "[significant]", "[NOT significant]")))
+}
 
 robustness_all <- bind_rows(rob_A, rob_B, rob_C, rob_T, rob_2nd, rob_9th, rob_time)
 
@@ -188,7 +187,7 @@ fig_rob <- robustness_all %>%
                 labels = c("0.1", "0.3", "0.5", "1", "1.5", "2", "3")) +
   labs(
     title    = "PSLRA Hazard Ratios Across Robustness Specifications",
-    subtitle = "Settlement suppression and dismissal acceleration robust across all specifications",
+    subtitle = "Hazard Ratios across Alternative Specifications and Subsets",
     x        = "Hazard Ratio (log scale) -- Post-PSLRA vs. Pre-PSLRA",
     y        = NULL,
     color    = "Outcome", shape = "Outcome",

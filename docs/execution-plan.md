@@ -416,7 +416,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### CHECKPOINT 1 [REVIEW]: Adversarial Code Review
-- [ ] RE-AUDIT IN PROGRESS (2026-04-01) — Scripts 01, 02, 03, 04, 05, 06 audited, fixed, and re-run. Remaining: 07, 08.
+- [x] COMPLETE (2026-04-01) — All 8 scripts audited, fixed, and verified end-to-end. Zero errors.
   - 03: Deleted Section 1B (debunked linear time-trend) and Section 6 (algebraically vacuous reference test). Both debunked model objects removed from cox_models.rds.
   - 04: Deleted Section 5 (debunked linear time-trend). Added M3 stopifnot sync check, M5/L2 NULL-safety, M6 citation fix, L5 p_value column. Debunked models removed from fine_gray_models.rds.
   - 05: Made ps_formula/ext_rhs conditional on include_stat. Replaced all hardcoded narrative (balance claim, "big move", "all p < 0.001", PH p-value) with dynamic output. Re-run and iptw_results.rds refreshed (2026-04-01).
