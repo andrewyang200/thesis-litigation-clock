@@ -90,18 +90,19 @@ which represents the probability that a case has experienced event type $k$ by t
 where $d_{kj}$ is the number of type-$k$ events at $t_j$ \citep{aalen1978}. We plot $\hat{F}_1(t)$ and $\hat{F}_2(t)$ stratified by PSLRA regime and circuit. Equality of CIFs across groups is tested using Gray's $K$-sample test \citep{gray1988}.
 
 \section{Semi-Parametric Hazard Regression}
+\label{sec:hazard_regression}
 
 \subsection{Cause-Specific Cox Proportional Hazards Models}
 
-The Cox model relates each case characteristic to its effect on
-the speed of resolution, holding all other factors constant. The
-key output is the \emph{hazard ratio} (HR): for a binary covariate
-such as PSLRA, a hazard ratio of 1.62 means that, at any point in
-time, post-PSLRA cases face a 62\% higher instantaneous rate of
-that event compared to pre-PSLRA cases, conditional on other
-covariates. $\text{HR} > 1$ indicates an accelerated event rate;
-$\text{HR} < 1$ indicates a suppressed rate; and $\text{HR} = 1$
-indicates no association.
+The Cox model relates each case characteristic to its association
+with the speed of resolution, holding all other factors constant.
+The key output is the \emph{hazard ratio} (HR): for a binary
+covariate such as PSLRA, a hazard ratio of 1.50 would mean that,
+at any point in time, post-PSLRA cases face a 50\% higher
+instantaneous rate of that event compared to pre-PSLRA cases,
+conditional on other covariates. $\text{HR} > 1$ indicates an
+accelerated event rate; $\text{HR} < 1$ indicates a suppressed
+rate; and $\text{HR} = 1$ indicates no association.
 
 Formally, the \emph{cause-specific hazard} for event type $k$ is defined as:
 \begin{equation}
@@ -118,6 +119,15 @@ L_k(\boldsymbol{\beta}_k) = \prod_{i:\delta_i = k} \frac{\exp(\boldsymbol{\beta}
 where $\mathcal{R}(T_i) = \{j : T_j \geq T_i\}$ is the risk set at time $T_i$.
 
 \subsection{Fine-Gray Subdistribution Hazard Models}
+
+While the cause-specific Cox model asks how covariates alter the
+instantaneous rate of one event among cases still at risk, the
+Fine-Gray model asks how covariates shift the \emph{cumulative
+probability} of that event over time, accounting for the fact
+that cases experiencing the competing event are permanently
+removed from candidacy. This distinction matters when the
+research question concerns the overall incidence of an outcome
+rather than its momentary rate.
 
 The Fine-Gray model parameterizes the \emph{subdistribution hazard} \citep{fine1999}:
 \begin{equation}
@@ -140,12 +150,12 @@ where $\mathbf{C}_i$, $\mathbf{O}_i$, and $\mathbf{S}_i$ are indicator vectors f
 
 \subsection{PSLRA $\times$ Circuit Interaction}
 
-To test whether the PSLRA's effect is uniform across circuits, we augment the extended specification with PSLRA $\times$ circuit interaction terms:
+To test whether the PSLRA's association is uniform across circuits, we augment the extended specification with PSLRA $\times$ circuit interaction terms:
 \begin{align}
-\eta_i ={}& \beta_1 \text{PSLRA}_i + \boldsymbol{\beta}_{\text{circ}}^\top \mathbf{C}_i + \boldsymbol{\theta}^\top (\text{PSLRA}_i \cdot \mathbf{C}_i) \notag \\
+\eta_i ={}& \beta_1 \text{PSLRA}_i + \boldsymbol{\beta}_{\text{circ}}^\top \mathbf{C}_i + \boldsymbol{\alpha}^\top (\text{PSLRA}_i \cdot \mathbf{C}_i) \notag \\
 &+ \boldsymbol{\beta}_{\text{orig}}^\top \mathbf{O}_i + \beta_4 \text{MDLFlag}_i + \beta_5 \text{JurisFQ}_i
 \end{align}
-where $\boldsymbol{\theta}$ captures circuit-specific deviations from the baseline PSLRA effect. The interaction model is compared to the additive specification using a likelihood ratio test (LRT). We restrict the interaction analysis to the top-six circuits by case volume to ensure stable estimates.
+where $\boldsymbol{\alpha}$ captures circuit-specific deviations from the baseline PSLRA coefficient. Statutory basis is excluded from the interaction specification because the PSLRA $\times$ circuit $\times$ statutory basis cross-tabulation produces thin cells that preclude stable estimation. The interaction model is compared to the additive specification using a likelihood ratio test (LRT), and we restrict the analysis to the top-six circuits by case volume to ensure stable estimates.
 
 \subsection{Proportional Hazards Diagnostics and Remediation}
 \label{sec:ph_diag}
@@ -162,7 +172,7 @@ where $g$ indexes strata and $\boldsymbol{\beta}_k$ is estimated jointly across 
 \begin{equation}
 \lambda_2(t \mid \text{PSLRA}, \mathbf{X}) = \lambda_{02}(t) \exp \left( \sum_{m=1}^{3} \beta_{2m} \left( \text{PSLRA} \cdot \mathbf{1}_{I_m}(t) \right) + \boldsymbol{\beta}_{\text{other}}^\top \mathbf{X} \right)
 \end{equation}
-where $I_1 = [0,1)$, $I_2 = [1,2)$, and $I_3 = [2,\infty)$. Proportional hazards assumption violations in circuit, origin, MDL, and statutory basis in the extended models are documented in Section~5.5 and addressed via stratification where feasible; full time-varying coefficient models for these covariates are a natural extension of this framework.
+where $I_1 = [0,1)$, $I_2 = [1,2)$, and $I_3 = [2,\infty)$. Proportional hazards assumption violations in circuit, origin, MDL, and statutory basis in the extended models are documented in the diagnostics section of Chapter~\ref{ch:results} and addressed via stratification where feasible; full time-varying coefficient models for these covariates are a natural extension of this framework.
 
 \section{Robustness and Sensitivity Analyses}
 
@@ -174,7 +184,7 @@ robustness checks.
 \textbf{Alternative disposition coding.} We implement three
 coding schemes: Scheme~A (primary), Scheme~B (Code~12
 reclassified as settlement), and Scheme~C (Codes~12 and~5
-reclassified as settlement), as defined in Section~4.3. We
+reclassified as settlement), as defined in Section~\ref{sec:coding_schemes}. We
 re-estimate baseline PSLRA Cox models under all three schemes
 and compare hazard ratios.
 
@@ -231,7 +241,7 @@ the reform itself rather than secular drift.
 \section{Composition Adjustment via Propensity-Score Weighting}
 \label{sec:iptw}
 
-The Cox models in Section~3.3 estimate associations between
+The Cox models in Section~\ref{sec:hazard_regression} estimate associations between
 covariates and hazard rates. However, the pre- and post-PSLRA
 case populations may differ systematically in composition---for
 example, in the distribution of filing circuits, statutory
@@ -304,20 +314,41 @@ as the threshold for adequate balance \citep{austinfine2025}.
 We interpret IPTW-weighted hazard ratios as
 \emph{composition-adjusted} estimates that isolate the PSLRA
 component from observable shifts in case composition. We do
-\emph{not} interpret them as causal effects. The
-no-unmeasured-confounding assumption is implausible over a
-34-year window: economic cycles, SEC enforcement intensity,
-judicial attitudes, and plaintiff bar strategies all evolved
-concurrently with the PSLRA and are not captured in the IDB.
+\emph{not} interpret them as causal effects. Valid causal
+inference via IPTW requires three assumptions, each of which
+is strained in this setting:
+\begin{enumerate}
+    \item \textbf{No unmeasured confounding} (conditional
+    exchangeability). All common causes of treatment and
+    outcome must be observed. This is implausible over a
+    34-year window: economic cycles, SEC enforcement
+    intensity, judicial attitudes, and plaintiff bar
+    strategies all evolved concurrently with the PSLRA and
+    are not captured in the IDB.
+    \item \textbf{Positivity} (overlap). Every covariate
+    stratum must contain both pre- and post-PSLRA cases. The
+    11.6:1 post-to-pre sample imbalance leaves many covariate
+    cells empty in the pre-PSLRA era, producing extreme
+    propensity scores that require trimming.
+    \item \textbf{Correct model specification.} The
+    propensity score model must be correctly specified. We
+    assess sensitivity to this assumption through the
+    four-strategy triangulation described above: convergence
+    of results across unadjusted, regression-adjusted, doubly
+    robust, and marginal structural specifications provides
+    evidence of functional-form robustness.
+\end{enumerate}
 Furthermore, some IPTW covariates (circuit filing patterns,
 statutory basis mix) may themselves be post-treatment
-consequences of the PSLRA, complicating the causal
-interpretation even under ideal conditions.
+consequences of the PSLRA, complicating even the
+compositional interpretation. For these reasons, we describe
+the IPTW estimates as ``composition-adjusted'' throughout,
+never as ``causally attributable.''
 
 \section{Shared Frailty Models for Circuit-Level Heterogeneity}
 \label{sec:frailty}
 
-The Cox models in Section~3.3 treat circuit as a fixed effect,
+The Cox models in Section~\ref{sec:hazard_regression} treat circuit as a fixed effect,
 estimating a separate hazard ratio for each circuit relative
 to a reference. This approach captures \emph{observed}
 circuit-level variation but cannot account for unobserved
@@ -327,19 +358,18 @@ induce correlation among cases within the same circuit
 \citep{ruetenbudde2019}.
 
 A shared frailty model introduces a circuit-level random
-effect. Let $u_c$ denote the frailty for circuit $c$, with
-% TODO: FIX FRAILTY MATH — coxme uses Gaussian random intercepts: u_c ~ N(0, theta).
-% The multiplicative frailty w_c = exp(u_c) is log-normal. Rewrite equation accordingly.
-$u_c \sim \text{LogNormal}(0, \theta)$, where $\theta$ is
-the frailty variance. The cause-specific hazard becomes:
+effect. Let $u_c$ denote the random intercept for circuit $c$,
+with $u_c \sim N(0, \theta)$, where $\theta$ is the frailty
+variance. The cause-specific hazard becomes:
 \begin{equation}
-\lambda_k(t \mid \mathbf{X}_i, u_{c(i)}) = u_{c(i)} \cdot \lambda_{0k}(t) \exp(\boldsymbol{\beta}_k^\top \mathbf{X}_i)
+\lambda_k(t \mid \mathbf{X}_i, u_{c(i)}) = \lambda_{0k}(t) \exp(\boldsymbol{\beta}_k^\top \mathbf{X}_i + u_{c(i)})
 \end{equation}
-where $c(i)$ is the circuit of case $i$. The frailty $u_c$
-acts as a multiplicative shift on the baseline hazard: circuits
-with $u_c > 1$ have uniformly higher event rates, and those
-with $u_c < 1$ have lower rates, after conditioning on
-covariates.
+where $c(i)$ is the circuit of case $i$. The random intercept
+$u_c$ acts as an additive shift on the log-hazard scale:
+circuits with $u_c > 0$ have uniformly higher event rates, and
+those with $u_c < 0$ have lower rates, after conditioning on
+covariates. Equivalently, $\exp(u_c)$ is a multiplicative
+frailty on the hazard scale with a log-normal distribution.
 
 The frailty variance $\theta$ quantifies the degree of
 unobserved circuit heterogeneity. A large $\theta$ indicates
