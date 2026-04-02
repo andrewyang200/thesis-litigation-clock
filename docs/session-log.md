@@ -317,3 +317,57 @@ Reclassifying Code 18 (statistical closing, 1,198 cases = 9.2%) as censored does
 - **5 LOW writing-review items from Task 9 still deferred**: subscript gap, ratio discrepancy, Gray's test note, train/test count, missing labels. Address in Phase 4 (Task 15).
 - All prior open issues from Section 5 of the condensed session log remain unchanged except: settlement hedge instruction (FIXED), frailty cluster count (FIXED).
 ---
+
+## Session: 2026-04-02 (Task 11 Part 1: Results Sections 5.1-5.2)
+### Plan Progress
+- Tasks completed this session: Task 11 Part 1 (Results Sections 5.1 and 5.2)
+- Current position in plan: Task 11 partially complete. Sections 5.1-5.2 done. Sections 5.3-5.4 pending.
+- Plan modifications needed: Task 11 should be split — Part 1 (5.1-5.2) COMPLETE, Part 2 (5.3-5.4) next session.
+### Completed
+- **Full structural outline** created and approved: 5.1 (Overview), 5.2 (PSLRA Effect with 5 evidence layers), 5.3 (Geographic), 5.4 (Case Characteristics), 5.5 (Diagnostics), 5.6 (Summary).
+- **Verified ALL numbers from R output** against Code 6-disaggregated data:
+  - CIF horizons: Pre-PSLRA settl 5.9/20.2/29.1/41.8, dism 17.6/31.9/37.1/49.2; Post-PSLRA settl 2.5/6.6/11.3/17.0, dism 30.9/44.9/55.7/68.1
+  - Baseline Cox: Settlement HR=0.445 (0.401-0.495), Dismissal HR=1.468 (1.342-1.606)
+  - **PH test: Settlement NOW REJECTS (p<0.001, was p=0.12)** — both outcomes violate PH
+  - Piecewise: 0-1yr HR=1.948 (1.675-2.266), 1-2yr HR=1.050 (0.883-1.249, p=0.582), 2+yr HR=1.329 (1.148-1.538)
+  - IPTW MSM: Settlement HR=0.690, Dismissal HR=1.526. All 8 estimates p<0.001.
+  - Robustness: all 7 specs updated. Range: Dismissal [1.32, 2.45], Settlement [0.44, 0.98].
+  - Placebo: Dismissal HR=0.719 (0.597-0.867, p=0.00055). Clean-window: Dismissal HR=1.394 (1.190-1.633).
+  - Gray's test (PSLRA): Settlement stat=302, Dismissal stat=167.
+  - Interaction LR: Settlement χ²=20.5 (df=5, p=0.001), Dismissal χ²=37.2 (df=5, p<0.001).
+- **Wrote new Section 5.1** (~70 lines): Updated KM and CIF numbers, added research-question transition.
+- **Wrote new Section 5.2** (~350 lines): 6 subsections with all 5 evidence layers:
+  - 5.2.1 CIF by PSLRA (updated table + Gray's stats)
+  - 5.2.2 Baseline Cox (updated HRs, PH now rejects for BOTH, settlement hedge foreshadow added)
+  - 5.2.3 Piecewise (updated HRs and CIs)
+  - 5.2.4 IPTW Triangulation (ENTIRELY NEW: table, weighted CIF figure, 4-strategy analysis)
+  - 5.2.5 Robustness + Identification (updated table, placebo/clean-window with CIs)
+  - 5.2.6 Synthesis (NEW: ties all layers together with settlement hedge)
+- **Writing reviewer agent**: Found 2 CRITICALs, 4 HIGHs, 4 MEDIUMs, 4 LOWs. All CRITICAL and HIGH fixed:
+  1. CRITICAL: HR discrepancy between baseline (N=12,968) and IPTW unadjusted (N=12,866) — added explanation of 102 dropped cases
+  2. CRITICAL: "factor of four" imprecise — changed to "factor of four or more"
+  3. HIGH: "Effect" in piecewise headers → "Association"
+  4. HIGH: "Both effects" → "Both associations" in clean-window
+  5. HIGH: Added HR definition reminder at first use in results chapter
+  6. HIGH: "isolate" → "remove the portion...explained by"
+  7. MEDIUM: "first documentation" → "to our knowledge, the first"
+  8. MEDIUM: Added Section 5.1 transition sentence connecting to research question
+  9. LOW: Removed redundant "empirical"
+  10. LOW: "reform impacts" → "reform associations"
+- **Reorganized Sections 5.3-5.6**: Old content placed under new section headings with TODO markers. All old tables/figures preserved. Labels preserved for cross-reference integrity.
+### Key Decisions
+- **Settlement PH now rejects**: Code 6 disaggregation changed the settlement baseline PH test from p=0.12 (not rejected) to p<0.001 (rejected). BOTH outcomes now violate PH. The old text's "fails to reject PH for settlement" is now WRONG. Updated to note both violations and interpret baseline HRs as "time-averaged summaries."
+- **IPTW dismissal HR is AMPLIFIED, not attenuated**: MSM HR=1.526 > unadjusted 1.466. Composition partially OFFSET the PSLRA dismissal effect. This is the opposite of the settlement story and is an important nuance.
+- **Settlement composition attenuation is ~45%**: Raw 56% reduction → 31% after IPTW. "Approximately half" is defensible.
+- **Interaction LR stats updated**: Settlement χ²=20.5 (was 13.46), Dismissal χ²=37.2 (was 40.14). Updated in 5.3 placeholder.
+- **Robustness range corrected**: Session log had stale [0.34, 0.61] for settlement; actual is [0.44, 0.98]. Dismissal range [1.32, 2.45] (session log had [1.28, 2.45]).
+### Next Steps
+- **Task 11 Part 2**: Write Sections 5.3 (Geographic Disparity) and 5.4 (Case Characteristics). Key new content: frailty results (5.3.4), interaction table (tab:interaction), all stale numbers in circuit/extended/FG tables.
+- **Task 12**: Sections 5.5 (Diagnostics) and 5.6 (Summary). Schoenfeld plots, IPTW balance, performance table verification.
+- **Task 13**: Discussion + Future Work.
+### Open Issues
+- **IPTW table lacks CIs**: Writing reviewer flagged missing confidence intervals in tab:iptw_triangulation. Need to check if iptw_results.rds stores CIs for all 4 strategies. LOW priority — all p<0.001 and table note says so.
+- **Old content in 5.3-5.4 has stale numbers**: All tables (tab:cox_circuit, tab:cox_ext_settle, tab:cox_ext_dismiss, tab:fg_comparison) need verification. Inline prose numbers also stale.
+- **Gray's test stats in circuit CIF caption are stale** (573.5/15.3): Need recomputation with all 11 circuits.
+- **5 LOW items from Task 9 still deferred**: subscript gap, ratio discrepancy, Gray's test note, train/test count, missing labels.
+---
