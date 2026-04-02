@@ -504,7 +504,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### Task 10 [FIX]: Rewrite Introduction
-- [ ] DRAFT-IN-REVIEW — Auto-accepted but rewritten twice. Current version has honest HR range [1.28-1.94], IPTW ≈1.53 headline, settlement hedge, placebo mention. Needs final review.
+- [x] COMPLETE (2026-04-02) — Reviewed and fixed: 5 contributions (added frailty bullet), 3 number fixes (HR range 2.45, settlement 0.445, 11 circuits), CRITICAL "loses significance" error corrected (spline p=0.001 IS significant; circuit sub-samples lose significance), three-tier language enforced, purpose statement + roadmap added. Writing reviewer: 0 CRITICAL remaining.
 
 **WHAT**: Reframe the Introduction around composition-adjusted inference:
 1. Replace contribution (iv) — currently RSF — with IPTW composition-adjusted analysis

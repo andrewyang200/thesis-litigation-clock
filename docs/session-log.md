@@ -14,7 +14,7 @@
 **Phase 3 (Chapter Reconstruction): IN PROGRESS** — Tasks 8-13.
 - Task 8 (Lit Review): COMPLETE (2026-04-01) — reviewed, 7 targeted fixes applied, no flip contamination found.
 - Task 9 (Methodology): COMPLETE (2026-04-01) — reviewed, 9 targeted fixes applied (frailty eq, IPTW assumptions, notation, accessibility, cross-refs). Writing reviewer: 0 HIGH remaining.
-- Task 10 (Introduction): DRAFT-IN-REVIEW — need review-then-fix approach (not full restart; flip contamination likely absent).
+- Task 10 (Introduction): COMPLETE (2026-04-02) — 5 contributions, 3 number fixes, CRITICAL significance error corrected, purpose statement + roadmap added.
 - Tasks 11-12 (Results restructure): NOT STARTED.
 - Task 13 (Discussion + Future Work): NOT STARTED.
 
@@ -156,11 +156,11 @@ Reclassifying Code 18 (statistical closing, 1,198 cases = 9.2%) as censored does
 ### Headline Numbers
 - Lead with **IPTW MSM HR ≈ 1.53** for dismissal (composition-adjusted), not the spline HR ≈ 2.45.
 - Report the full range [1.28, 2.45] across specifications.
-- Settlement claim must be hedged: "attenuates and loses statistical significance under flexible time-trend controls" (spline HR=0.610, p=0.001 but 1992 placebo undermines the identification).
+- Settlement claim must be hedged: "attenuates substantially under flexible time-trend controls (HR = 0.610) and loses statistical significance entirely in circuit-specific sub-samples" (Second Circuit HR=0.980, p=0.95; Ninth Circuit HR=0.869, p=0.13). The 1992 placebo further undermines identification.
 
 ### Framing Rules
 - IPTW is a **decomposition** (how much of the raw PSLRA effect is explained by observable composition changes), not an "adjustment toward truth."
-- Frailty is a **sensitivity analysis** (13 clusters is marginal), not a standalone model.
+- Frailty is a **sensitivity analysis** (11 clusters is marginal), not a standalone model.
 - The "Dismissal Flip" is an **artifact of linear overfitting** and must never appear in the thesis.
 - PH violations make all constant-HR estimates "time-averaged summaries."
 - Fine-Gray C-index is an **approximation** — acknowledge in Discussion.
@@ -285,4 +285,35 @@ Reclassifying Code 18 (statistical closing, 1,198 cases = 9.2%) as censored does
 ### Open Issues
 - **5 LOW writing-review items deferred** (not blocking): subscript gap β_1→β_4→β_5, 11.6:1 vs 11.5:1 minor ratio discrepancy, Gray's test large-sample note, train/test split count note (12,866 vs 12,968), missing \label{} on non-cross-referenced sections. Can be addressed during Phase 4 polish (Task 15).
 - All prior open issues from Section 5 of the condensed session log remain unchanged.
+---
+
+## Session: 2026-04-02 (Task 10: Introduction Review & Fix)
+### Plan Progress
+- Tasks completed this session: Task 10 (Introduction review and fix)
+- Current position in plan: Task 10 of 16 complete. Next: Task 11 (Results restructure Part 1).
+- Plan modifications needed: Task 10 status should change from "DRAFT-IN-REVIEW" to COMPLETE.
+### Completed
+- **Reviewed and restructured intro.tex contributions**: Expanded from 4 to 5 contributions. Contribution 2 (IPTW) sharpened to "first application of propensity-score re-weighting to adjust for compositional confounding in securities litigation outcomes." NEW contribution 3 (Sensitivity) added for shared frailty as explicit sensitivity analysis.
+- **Fixed 3 stale/wrong numbers**:
+  - Dismissal HR range: 1.94 → 2.45 (verified from robustness_results.rds)
+  - Settlement baseline HR: 0.378 → 0.445 (verified from cox_models.rds — 0.378 was pre-Code-6)
+  - Circuit count: 13 → 11 (verified from frailty_results.rds metadata — code filters n >= 50)
+- **Fixed CRITICAL factual error caught by writing-reviewer**: "loses statistical significance under flexible time-trend controls" was false — spline settlement HR = 0.610 has p = 0.001 (significant). Corrected to "attenuates substantially under flexible time-trend controls (HR = 0.610) and loses statistical significance entirely in circuit-specific sub-samples" (Second Circuit p=0.95, Ninth Circuit p=0.13).
+- **Three-tier language fixes**: "isolate the PSLRA's effect" → "examine the PSLRA's association"; "demonstrating that the Act operates as a persistent accelerant" → "finding that the Act is associated with persistently elevated dismissal hazard"; "raw PSLRA effect" → "raw PSLRA association".
+- **Added chapter-opening purpose statement** (lines 5-8): "This chapter motivates the research question..."
+- **Added sample size** (N=12,968, 1990-2024) to contribution 1.
+- **Expanded "hidden settlements"** with explanatory clause for non-specialists.
+- **Added roadmap paragraph** at end with \ref{} cross-references to all 7 chapters.
+- **Fixed session-log stale instructions**: Line 159 settlement hedge corrected; line 163 frailty clusters 13→11.
+### Key Decisions
+- **Settlement hedge revised based on actual data**: The session log's own hedge instruction was internally contradictory (said "loses significance" then cited p=0.001). The correct pattern is: attenuates under spline (but remains significant), loses significance in circuit sub-samples. This distinction matters for Results/Discussion chapters — do not claim global loss of significance.
+- **Five contributions, not four**: Frailty earns its own bullet as a sensitivity analysis rather than being buried in the IPTW contribution. This makes the thesis structure clearer.
+- **"Population-level administrative data" replaced with concrete N**: 12,968 cases is more compelling and verifiable than a vague descriptor.
+### Next Steps
+- **Task 11**: Restructure Results Chapter Part 1 (Sections 5.1-5.4). This is the biggest lift remaining — claim-based rewrite with all stale pre-Code-6 numbers replaced from actual R output. Read current `results.tex` first. Key structure: 5.1 Overview, 5.2 PSLRA Effect (layered evidence), 5.3 Geographic Disparity (circuits + frailty), 5.4 Case Characteristics (MDL, origin, statutory basis).
+- **Task 12**: Results Part 2 (Diagnostics + Summary). Depends on Task 11 completion.
+- **Reminder**: 7 `% TODO: REWRITE PROSE` markers in results.tex must all be resolved in Tasks 11-12.
+### Open Issues
+- **5 LOW writing-review items from Task 9 still deferred**: subscript gap, ratio discrepancy, Gray's test note, train/test count, missing labels. Address in Phase 4 (Task 15).
+- All prior open issues from Section 5 of the condensed session log remain unchanged except: settlement hedge instruction (FIXED), frailty cluster count (FIXED).
 ---
