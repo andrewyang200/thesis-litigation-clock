@@ -5,11 +5,12 @@
 This chapter synthesizes our empirical results, connects them
 to the broader literature and policy landscape, and identifies
 the most important directions for extending this work. We
-organize the discussion around four substantive themes: the
-PSLRA as a procedural filter, judicial geography as a
-structural determinant of outcomes, the role of case-level
-characteristics, and the methodological lessons from
-comparing semi-parametric and nonparametric frameworks.
+organize the discussion around five substantive themes: the
+PSLRA as a time-varying procedural filter, the decomposition
+of the raw PSLRA association via composition adjustment, judicial
+geography as a structural determinant of outcomes, the role
+of case-level characteristics, and the identification limits
+that constrain causal interpretation of all estimates.
 
 \section{Summary of the Research Question and Approach}
 
@@ -31,71 +32,132 @@ We address both challenges using a competing-risks survival
 framework applied to 12,968 federal securities class actions
 from the FJC Integrated Database. The framework combines
 Aalen-Johansen nonparametric CIF estimation, cause-specific
-Cox models, Fine-Gray subdistribution models, and a Random
-Survival Forest benchmark, all evaluated on a held-out test
-set. To our knowledge, this is the first application of a
-full competing-risks framework to population-level
-administrative data on federal securities litigation.
+Cox models, Fine-Gray subdistribution models,
+inverse-probability-of-treatment-weighted (IPTW) models for
+composition adjustment, and shared frailty models for
+sensitivity to unobserved circuit-level heterogeneity. To
+our knowledge, this is the first application of a full
+competing-risks framework---incorporating both
+composition-adjusted and random-effects extensions---to
+population-level administrative data on federal securities
+litigation.
 
-\section{Policy Implications of the PSLRA Effect}
+\section{Policy Implications of the PSLRA Association}
 
-Our results provide the most precise empirical
-characterization to date of how the Private Securities
-Litigation Reform Act of 1995 reshaped the litigation
-landscape. The three-phase temporal decomposition is the
-single most policy-relevant finding in this thesis. In the
-first year, post-PSLRA cases face an 86\% higher
-dismissal hazard than pre-PSLRA cases (HR $= 1.859$). This is
-the PSLRA's heightened pleading standard and automatic
-discovery stay operating as designed: the ``strong
-inference'' of scienter requirement raises the bar for
-surviving a motion to dismiss, and the discovery stay
+Our results provide the most detailed empirical
+characterization to date of the association between the
+Private Securities Litigation Reform Act of 1995 and
+securities litigation dynamics. The three-phase temporal decomposition
+(Section~\ref{sec:piecewise}) is the single most
+policy-relevant finding in this thesis. In the
+first year, post-PSLRA cases are associated with a 95\% higher
+instantaneous dismissal hazard (HR $= 1.948$, 95\% CI:
+1.675--2.266). This is the PSLRA's heightened pleading
+standard and automatic discovery stay operating as designed:
+the ``strong inference'' of scienter requirement raises the
+bar for surviving a motion to dismiss, and the discovery stay
 prevents plaintiffs from using early discovery to supplement
 insufficiently pleaded complaints.
 
-The null effect in years one to two (HR $= 1.044$, $p >
-0.05$) is equally important. Cases that survive the
+The null association in years one to two (HR $= 1.050$,
+$p = 0.582$) is equally important. Cases that survive the
 first-year gauntlet face no differential dismissal risk
 compared to pre-PSLRA survivors in the following year. This
 pattern is consistent with the PSLRA acting as a one-time
 filter at the pleading stage: once a case has demonstrated
 sufficient pleading adequacy to survive initial review, the
 reform no longer systematically disadvantages plaintiffs.
-The re-emergence of a modest PSLRA effect beyond two years
-(HR $= 1.293$) may reflect differences in summary judgment
-practice or a selection effect among long-duration
-post-PSLRA survivors.
+The re-emergence of a modest PSLRA association beyond two
+years (HR $= 1.329$, $p < 0.001$) may reflect differences
+in summary judgment practice or a selection effect among
+long-duration post-PSLRA survivors.
 
-From a policy standpoint, our findings support the
-interpretation that the PSLRA achieved its primary
-legislative objective of filtering meritless early-stage
-claims. The first-year dismissal hazard amplification is
-large and precisely estimated; the subsequent null effect
-suggests that surviving cases proceed on approximately equal
-footing with pre-PSLRA cases. Whether this filtering is
-appropriately calibrated---that is, whether some meritorious
-cases are caught in the same net---requires merging our
-dataset with settlement amount data and merit proxies, and
-remains an open empirical question.
+From a policy standpoint, the three-phase temporal pattern
+is consistent with the interpretation that the PSLRA
+functions primarily as an early-stage procedural filter. The
+first-year dismissal association is large and precisely
+estimated; the subsequent null period suggests that surviving
+cases proceed on approximately equal footing with pre-PSLRA
+cases. However, we cannot determine from administrative data
+alone whether the filtered cases are genuinely meritless or
+whether some meritorious claims are caught in the same net.
+Answering that question requires merging our dataset with
+settlement amount data and case-specific merit proxies, and
+remains an open empirical question that the identification
+limits documented in our robustness analysis (particularly
+the placebo test failure) make especially pressing.
 
-The robustness analysis provides important bounds on the
-settlement effect, but also reveals a significant caveat.
+The robustness analysis (Table~\ref{tab:robustness}) provides
+important bounds on the settlement association, but also
+reveals meaningful fragility.
 Under the most liberal coding scheme (Scheme~B), the PSLRA
-settlement HR rises from 0.378 to 0.696, still representing
-a 30\% reduction in settlement hazard. The true effect lies
-within the interval $[0.378, 0.696]$ depending on the
-fraction of Code~12 cases representing private settlements.
-However, when flexible time-trend controls (a natural spline
-with $df{=}3$) absorb secular changes in judicial behavior,
-the settlement HR attenuates further to 0.748 and loses
-statistical significance ($p = 0.076$). This suggests that
-part of the raw settlement suppression attributed to the
-PSLRA in the baseline specification reflects concurrent
-secular trends in litigation patterns rather than the reform
-alone. The settlement finding is therefore robust to
-disposition coding choices but sensitive to time-trend
-specification, and should be interpreted with appropriate
-caution.
+settlement HR rises from 0.445 to 0.722, still representing
+an approximately 28\% reduction in settlement hazard. The
+range across coding schemes ($[0.445, 0.722]$) depends on the
+fraction of Code~12 voluntary dismissals that represent
+private settlements. Under flexible time-trend controls
+(a natural spline with $df{=}3$), the settlement HR
+attenuates to 0.610 ($p = 0.001$)---still significant, but
+substantially reduced from the raw estimate. Critically,
+the settlement association loses statistical significance
+entirely within individual circuits (Second Circuit:
+HR $= 0.980$, $p = 0.953$; Ninth Circuit: HR $= 0.869$,
+$p = 0.129$), and the 1992 placebo test detects significant
+pre-existing trends before the reform was enacted (HR $= 0.719$,
+$p < 0.001$), further limiting attribution to the PSLRA
+specifically. The settlement finding is therefore directionally
+consistent across all specifications but fragile to
+circuit-specific decomposition and confounded by pre-existing
+temporal trends.
+
+\section{Composition-Adjusted Decomposition}
+
+The IPTW triangulation (Section~\ref{sec:results_iptw})
+addresses a natural question: how much of the raw PSLRA
+association persists after adjusting for observable case-mix
+changes, and how much is explained by those compositional
+shifts? The answer
+differs sharply by outcome. For dismissal, the
+composition-adjusted MSM estimate (HR $= 1.526$) is
+\emph{slightly amplified} relative to the unadjusted
+HR of 1.466, indicating that concurrent compositional
+shifts---changes in circuit filing patterns, statutory basis
+mix, and MDL prevalence---actually worked \emph{against} the
+dismissal association. After adjusting for these observable
+changes in case composition, the PSLRA's association with
+dismissal is modestly larger, not smaller. The full
+triangulation (unadjusted 1.466, regression-adjusted 1.746,
+doubly robust 1.804, MSM 1.526) confirms that the dismissal
+finding is robust to the weighting strategy chosen.
+
+For settlement, composition adjustment attenuates the raw
+association substantially: from a baseline HR of 0.439 to
+an MSM HR of 0.690 (and regression-adjusted 0.701).
+Approximately half the raw settlement suppression is
+explained by observable shifts in case composition across
+the pre- and post-PSLRA periods. This does not mean the
+remaining association is causally attributable to the reform:
+the IPTW framework adjusts for observed compositional
+differences but cannot control for unobserved secular
+trends in judicial behavior, plaintiff strategy, or economic
+conditions.
+
+The composition-adjusted estimates inherit two important
+caveats. First, several covariates included in the
+propensity score model---circuit, origin, MDL status, and
+statutory basis---may themselves be consequences of the
+PSLRA rather than pre-treatment confounders. If the reform
+altered where and how cases were filed, the IPTW adjustment
+absorbs some of the reform's \emph{indirect} effects,
+producing a lower bound on the total PSLRA association.
+Second, the 1992 placebo test (dismissal HR $= 0.719$,
+$p < 0.001$) detects significant pre-existing trends in the
+pre-PSLRA period, indicating that the model cannot cleanly
+separate the reform from concurrent temporal drift. These
+estimates are best understood as a decomposition---isolating
+the component of the raw association not explained by
+observable case-mix changes---rather than a causal
+identification.
 
 \section{Circuit Heterogeneity and Judicial Geography}
 
@@ -104,43 +166,72 @@ by both the cause-specific Cox models and the Fine-Gray
 subdistribution analysis---raises fundamental questions
 about the role of judicial institutions in shaping litigation
 outcomes. The Second Circuit's anomalous position is the
-most striking geographic finding. Cases filed there are
-anywhere from 5 to 17 times less likely to settle at any
-given duration than cases in other major circuits, yet they
-have the highest cumulative dismissal incidence. This
-combination defines a litigation environment distinctively
-hostile to monetary recovery for plaintiffs' counsel.
+most striking geographic finding. Every other circuit has a
+settlement hazard 4.1 to 17.6 times that of the Second
+Circuit (Table~\ref{tab:cox_ext_settle}), yet the Second
+Circuit has the highest cumulative
+dismissal incidence. This combination defines a litigation
+environment distinctively hostile to monetary recovery for
+plaintiffs' counsel. Importantly, our data reflect the full
+Second Circuit (including EDNY, NDNY, WDNY, and the
+District of Vermont), so this pattern is not attributable
+solely to the Southern District of New York, though SDNY
+contributes the largest share of cases.
 
-Several mechanisms could explain this pattern. The Southern
-District of New York handles a disproportionate share of the
-most complex and high-stakes securities cases, and defendants
-in these cases are typically represented by elite defense
-counsel with substantial expertise, which may reduce early
-settlement probability. SDNY judges also have extensive
+Several mechanisms could explain this pattern. The Second
+Circuit handles a disproportionate share of the most complex
+and high-stakes securities cases, and defendants in these
+cases are typically represented by elite defense counsel
+with substantial expertise, which may reduce early settlement
+probability. Second Circuit judges also have extensive
 experience with securities class actions and may apply
 demanding standards at class certification, reducing the
 expected value of cases to plaintiffs. The PSLRA $\times$
 Circuit interaction analysis adds a temporal dimension:
-the PSLRA's suppression of settlement hazard was largest in
-the Second Circuit, consistent with the hypothesis that the
-Act's heightened pleading standard interacted with SDNY's
-already-demanding judicial environment.
+within the Second Circuit (the reference category), the PSLRA
+is associated with a 142\% higher dismissal hazard
+(HR $= 2.422$, $p < 0.001$), while the reform's settlement
+association is non-significant (HR $= 1.344$, $p = 0.371$),
+consistent with the Second Circuit's already-restrictive
+settlement environment leaving less room for additional
+suppression.
 
-The Eleventh Circuit's anomalous interaction for dismissal
-(interaction HR $= 0.376$) and the Ninth Circuit's
-attenuation (HR $= 0.703$) point to meaningful variation
-in how district courts applied the PSLRA's ``strong
-inference'' scienter standard. Prior work by Johnson et al.\
-\citep{johnson2001} and Choi \citep{choi2007} has documented
+The most striking interaction attenuations for dismissal are
+in the Fourth Circuit (HR $= 0.266$, $p < 0.001$) and
+Eleventh Circuit (HR $= 0.441$, $p < 0.001$), indicating
+that the PSLRA's dismissal amplification is strongly
+attenuated in these jurisdictions. Prior work by
+\citet{johnson2001} and \citet{choi2007} has documented
 circuit-level variation in PSLRA application; our
 competing-risks framework provides the first quantitative
 estimates of how this variation manifests in the joint
 distribution of settlement and dismissal timing.
 
-The policy implication is sobering. If the PSLRA's filtering
-effects are substantially larger in the Second Circuit, then
-plaintiffs filing in New York face a qualitatively different
-litigation environment than those filing elsewhere. This
+The shared frailty models (Section~\ref{sec:frailty}) add an
+important dimension to this geographic analysis. The settlement frailty variance is
+substantial ($\hat{\theta} = 0.449$), indicating that
+unobserved circuit-level factors---judicial culture, local
+bar norms, case-management practices not captured by the
+observed covariates---contribute meaningfully to settlement
+heterogeneity beyond what the fixed-effect circuit indicators
+capture. By contrast, the dismissal frailty variance is
+modest ($\hat{\theta} = 0.033$), suggesting the fixed-effect
+circuit indicators already capture most circuit-level
+variation in dismissal timing. Importantly, the PSLRA
+hazard ratio is virtually identical between fixed-effect
+and random-effect models (difference $< 0.001$), which is
+mathematically expected for a national-level treatment
+applied uniformly across all circuits. The frailty model's
+contribution is not an alternative PSLRA estimate but rather
+a quantification of the residual geographic heterogeneity
+and cluster-robust standard errors that widen confidence
+intervals by a factor of 2.8$\times$ for settlement
+($p = 0.023$) and 2.0$\times$ for dismissal ($p < 0.001$).
+
+The policy implication is sobering. If the PSLRA's
+filtering effects vary substantially across circuits, then
+plaintiffs filing in different jurisdictions face
+qualitatively different litigation environments. This
 raises questions about regulatory forum shopping, the
 appropriate geographic scope of securities law reform, and
 whether the PSLRA inadvertently created
@@ -149,114 +240,227 @@ jurisdiction-specific barriers to recovery.
 \section{Structural Case Characteristics: MDL, Origin,
 and Statutory Basis}
 
-The MDL finding is methodologically novel. MDL
-consolidation suppresses both cause-specific hazards by
-approximately 73--74\%, indicating that MDL cases resolve
-at dramatically lower instantaneous rates regardless of
-their eventual outcome. The natural interpretation is that
+The MDL finding (Section~\ref{sec:results_characteristics})
+is methodologically novel. MDL consolidation is associated
+with large bilateral suppression
+of both cause-specific hazards---approximately 72\% for
+settlement (HR $= 0.284$, 95\% CI: 0.212--0.379) and 75\%
+for dismissal (HR $= 0.247$, 95\% CI:
+0.219--0.277)---indicating that MDL cases resolve at
+dramatically lower instantaneous rates regardless of their
+eventual outcome. The natural interpretation is that
 consolidation introduces coordination costs and procedural
-delays---bellwether trials, coordinated discovery
-schedules, global resolution frameworks---that slow
-individual case resolution. The Fine-Gray subdistribution
-analysis complicates this picture in an important way:
-despite the dramatically lower instantaneous hazards, MDL
-cases show a modestly higher cumulative settlement probability
-(SHR $= 1.126$, 95\% CI $[0.795, 1.595]$, $p = 0.503$). Because bilateral suppression of both
-hazards keeps large numbers of MDL cases in the risk set
-throughout the study period, cumulative settlement
-probability accumulates to a similar---or slightly higher---level as
-non-MDL cases, though this difference is not statistically significant. This finding would be completely invisible
-to a single-outcome analysis.
+delays---bellwether trials, coordinated discovery schedules,
+global resolution frameworks---that slow individual case
+resolution. The Fine-Gray subdistribution analysis
+complicates this picture in an important way: despite the
+dramatically lower instantaneous hazards, MDL cases show
+a modestly higher cumulative settlement probability
+(SHR $= 1.167$, 95\% CI: 0.913--1.492, $p = 0.217$).
+Because bilateral suppression of both hazards keeps large
+numbers of MDL cases in the risk set throughout the study
+period, cumulative settlement probability accumulates to a
+similar level as non-MDL cases despite the substantially
+lower instantaneous settlement rate---though this difference
+is not statistically significant. This sign reversal is
+visible only through competing-risks analysis and illustrates
+why both cause-specific and subdistribution frameworks are
+necessary for a complete picture of resolution dynamics.
 
-Case origin results suggest that removed cases face lower
-dismissal hazard (HR $= 0.783$) and directionally higher
-settlement hazard, consistent with the interpretation that
-cases initially filed in state court involve claims where
-settlement is a more natural resolution than federal
+Case origin results suggest that removed cases are associated
+with lower dismissal hazard (HR $= 0.791$, 95\% CI:
+0.632--0.990) and higher settlement hazard (HR $= 1.540$,
+95\% CI: 1.053--2.252), consistent with the interpretation
+that cases initially filed in state court involve claims
+where settlement is a more natural resolution than federal
 dismissal. Statutory basis results are subtler: Section~11
-cases have a modestly higher dismissal hazard than
-Section~10(b) cases (HR $= 1.121$), which may reflect
+cases are associated with a modestly higher dismissal hazard
+than Section~10(b) cases (HR $= 1.118$, 95\% CI:
+1.044--1.197) and a modestly higher settlement hazard
+(HR $= 1.167$, 95\% CI: 1.013--1.345), which may reflect
 tracing and standing requirements in IPO and secondary
-offering contexts that create early dismissal opportunities
-defendants exploit aggressively.
+offering contexts that create both additional dismissal
+opportunities and, for surviving cases, stronger settlement
+incentives.
 
 \section{Limitations}
 
-The primary limitations of our modeling framework center on unobserved 
-heterogeneity. Our hazard ratios represent population-averaged effects 
-conditional only on observed administrative covariates. However, prior 
-literature identifies case-specific merit signals---such as the magnitude 
-of stock price drops, the presence of SEC investigations, or accounting 
-restatements---as strong predictors of outcomes \citep{cox2008, johnson2001}. 
-Because these metrics are absent from our dataset, our models cannot isolate 
-how much of the PSLRA's early dismissal effect was driven by the dismissal 
-of genuinely meritless claims versus structurally complex but valid claims. 
+Several limitations constrain interpretation of our
+findings. We organize them by severity, beginning with
+those that most directly affect the credibility of our
+central estimates.
 
+\paragraph{Identification limits.}
+The 1992 placebo test is the single most important
+limitation. By placing a fictitious reform at 1992 within
+the pre-PSLRA period (1990--1995), we detect a significant
+dismissal HR of 0.719 ($p < 0.001$), indicating that the
+model captures pre-existing trends in dismissal rates
+\emph{in the absence of any legislative change}. This result
+precludes clean causal attribution of the observed PSLRA
+association to the reform in isolation and strengthens our
+decision to frame all estimates as associational or
+composition-adjusted rather than causally identified. A
+narrow-window analysis (1993--1998) confirms that the
+dismissal association survives in a restricted band
+(HR $= 1.394$, $p < 0.001$), but this is not a formal
+regression discontinuity design and cannot fully address the
+placebo concern.
 
-Furthermore, litigation outcomes are highly dependent on the specific
-judge assigned to the case and the caliber of the law firms involved
-\citep{wang2022}. While we implement circuit-level shared frailty models
-to account for clustering at the circuit level, the IDB lacks consistent
-judge identifiers or attorney data, so finer-grained clustering at the
-judge or counsel level remains unmodeled. Consequently, unobserved
-judicial or counsel quality may confound some of our observed circuit
-or origin effects. Finally, our reliance on the 
-Grambsch-Therneau global tests indicates that proportional hazards 
-assumptions are violated in our extended models; our current estimates 
-must therefore be strictly interpreted as average effects over the study 
-period rather than constant instantaneous risks.
+\paragraph{Post-treatment bias in composition adjustment.}
+Several covariates included in the IPTW propensity score
+model---circuit filing location, case origin, MDL
+consolidation, and statutory basis---may themselves be
+consequences of the PSLRA rather than pre-treatment
+confounders. If the reform altered where and how securities
+class actions were filed, the composition-adjusted estimates
+absorb some of the reform's \emph{indirect} effects,
+producing a lower bound on the total PSLRA association.
+The composition-adjusted HR should therefore be interpreted
+as the component of the raw association not explained by
+observable case-mix shifts, not as the ``true'' reform
+effect.
+
+\paragraph{Unobserved heterogeneity.}
+Our hazard ratios represent population-averaged associations
+conditional only on observed administrative covariates.
+Prior literature identifies case-specific merit
+signals---such as the magnitude of stock price drops, the
+presence of SEC investigations, or accounting
+restatements---as strong predictors of outcomes
+\citep{cox2008, johnson2001}. Because these metrics are
+absent from our dataset, our models cannot isolate how much
+of the PSLRA's early dismissal association is driven by the
+dismissal of genuinely meritless claims versus structurally
+complex but valid claims. Litigation outcomes are also
+highly dependent on the specific judge assigned to a case
+and the caliber of the law firms involved
+\citep{wang2022}. While we implement circuit-level shared
+frailty models, the IDB lacks consistent judge identifiers
+or attorney data; finer-grained clustering at the judge or
+counsel level remains unmodeled.
+
+\paragraph{Small-cluster frailty caveat.}
+The shared frailty models operate with only 11 circuit-level
+clusters, well below the 20--30 clusters typically
+recommended for reliable variance estimation. The frailty
+variance estimates ($\hat{\theta}_{\text{settle}} = 0.449$,
+$\hat{\theta}_{\text{dismiss}} = 0.033$) should be treated
+as indicative rather than precise, and may be biased
+downward.
+
+\paragraph{Disposition coding and Code~6 disaggregation.}
+Our primary disposition scheme disaggregates FJC Code~6
+(``Judgment on Motion Before Trial'') using the IDB
+JUDGMENT field, reclassifying plaintiff victories as
+settlements and defendant victories as dismissals. Of the
+701 plaintiff-victory reclassifications, 93.4\% are
+post-PSLRA cases, introducing a potential era confound: if
+post-PSLRA courts are more likely to record motion outcomes
+via Code~6 than pre-PSLRA courts, the reclassification may
+amplify the apparent PSLRA association. The robustness of
+our results across all three coding schemes (A, B, C)
+provides partial reassurance, but this coding asymmetry
+should be noted when interpreting the precise magnitudes.
+
+\paragraph{Proportional hazards violations.}
+Grambsch-Therneau global tests reject proportional hazards
+in both extended models (settlement: $\chi^2 = 301.1$,
+$p < 0.001$; dismissal: $\chi^2 = 471.2$, $p < 0.001$).
+All constant hazard ratio estimates in this thesis must
+therefore be interpreted as time-averaged summaries of a
+more complex temporal relationship, not as constant
+instantaneous risks. The piecewise Cox model partially
+addresses this for the PSLRA covariate, but other
+covariates' time-varying effects remain unmodeled.
 
 \section{Future Research Directions}
 
-Several extensions would substantially strengthen this
-analysis. CourtListener integration would provide
-title-based class action validation, docket activity
-complexity proxies, and attorney identifiers, enabling
-examination of law firm quality effects in a competing-risks
-duration framework \citep{wang2022}. Merging with the
-Stanford Securities Class Action Clearinghouse would provide
-merit proxies---stock price drop magnitudes, accounting
-restatement indicators, parallel SEC action flags---that
-would sharpen interpretation of PSLRA filtering effects.
+Several extensions would substantially strengthen the
+analysis developed here.
+
+\paragraph{Data enrichment.}
+CourtListener integration would provide title-based class
+action validation, docket activity complexity proxies, and
+attorney identifiers, enabling examination of law firm
+quality effects in a competing-risks duration framework
+\citep{wang2022}. If consistent judge identifiers can be
+recovered, extending the current circuit-level shared frailty
+models to judge-level random effects would capture
+within-circuit heterogeneity in judicial behavior. Merging
+with the Stanford Securities Class Action Clearinghouse would
+provide merit proxies---stock price drop magnitudes,
+accounting restatement indicators, parallel SEC action
+flags---that would sharpen interpretation of PSLRA filtering
+effects. Settlement amount analysis combined with the
+competing-risks duration framework would provide a more
+complete picture of the economic consequences of PSLRA and
+circuit effects.
+
+\paragraph{Methodological extensions.}
 Full time-varying coefficient models for circuit, origin,
-MDL, and statutory basis are needed to address the
-documented proportional hazards assumption violations.
-Frailty models incorporating judge-level random effects,
-if consistent judge identifiers can be recovered from
-CourtListener, could account for unobserved judge-level
-heterogeneity. Settlement amount analysis combined with
-our competing-risks duration framework would provide a more
-complete picture of the economic consequences of PSLRA
-and circuit effects. Finally, testing for post-2018
-structural breaks---including the Supreme Court's decision
-in \textit{Cyan, Inc.\ v.\ Beaver County Employees
-Retirement Fund}---is a natural extension of the piecewise
-hazard approach developed here.
+MDL, and statutory basis are needed to address the documented
+proportional hazards assumption violations. A piecewise
+IPTW model decomposing the composition-adjusted PSLRA effect
+across the same three time periods used in the unweighted
+analysis would test whether the time-varying signature
+survives composition adjustment. A narrow-window IPTW
+analysis restricted to cases filed 1993--1998 would provide
+the strongest quasi-experimental test of the PSLRA's
+association, though the smaller sample may limit statistical
+power.
+
+\paragraph{Structural breaks.}
+Testing for post-2018 structural breaks---including the
+Supreme Court's decision in \textit{Cyan, Inc.\ v.\ Beaver
+County Employees Retirement Fund}, which expanded state
+court jurisdiction over Securities Act claims---is a natural
+extension of the piecewise hazard approach developed here.
+If the post-\textit{Cyan} period features a shift in filing
+patterns or resolution dynamics, the competing-risks
+framework is well positioned to detect and characterize it.
 
 \section{Conclusion}
 
-Federal securities class actions are among the most economically 
-consequential civil cases litigated in the United States. 
- 
-Yet, their duration and outcome dynamics have historically been evaluated 
-through incomplete statistical lenses that ignore the fundamentally 
-competing nature of case resolution. By applying a full competing-risks 
-survival framework to population-level administrative data, this thesis 
-corrects that methodological blind spot and reveals a litigation landscape 
-defined by profound structural asymmetries.
+Federal securities class actions are among the most
+economically consequential civil cases litigated in the
+United States, yet their duration and outcome dynamics have
+historically been evaluated through incomplete statistical
+lenses that ignore the fundamentally competing nature of
+case resolution. By applying a full competing-risks survival
+framework---incorporating cause-specific and subdistribution
+models, composition adjustment via IPTW, and shared frailty
+sensitivity analysis---to the universe of federal securities
+class actions recorded in the IDB, this thesis addresses
+that methodological gap and
+reveals a litigation landscape defined by profound structural
+asymmetries.
 
-We have demonstrated that the PSLRA transformed securities litigation 
-not as a permanent dampener on plaintiff success, but as a highly specific, 
-first-year procedural filter. We have shown that multidistrict litigation 
-consolidation dramatically slows the pace of justice without systematically 
-altering the ultimate probability of settlement. Most significantly, we 
-have quantified how circuit geography dictates case trajectories, revealing 
-a fragmented federal system where the jurisdiction of filing is as 
-determinative of a case's fate as the substantive law itself. 
+We have shown that the PSLRA is associated with a
+time-varying reshaping of securities litigation, acting not
+as a uniform shift in outcomes but as a highly concentrated
+first-year procedural filter (piecewise dismissal
+HR $= 1.948$, $p < 0.001$) that largely dissipates
+thereafter. This association survives composition
+adjustment (MSM HR $= 1.526$) and is robust across all
+seven robustness specifications, though the 1992 placebo
+test precludes strict causal attribution. We have shown
+that multidistrict litigation consolidation is associated
+with dramatically lower instantaneous resolution rates
+without detectably altering cumulative settlement
+probability---a finding visible only through
+competing-risks analysis. Most strikingly, circuit geography
+emerges as the dominant predictor of case trajectories, with
+settlement hazard ratios spanning a 17-fold range across
+circuits and substantial unobserved heterogeneity
+($\hat{\theta} = 0.449$) remaining even after accounting for
+observable case characteristics.
 
-As policymakers continue to debate the balance between deterring corporate 
-fraud and curbing frivolous litigation, the findings presented here provide 
-a rigorous empirical foundation. Evaluating the health of the securities 
-litigation system requires looking beyond simple settlement averages; 
-it demands an accounting of the competing risks, procedural delays, and 
-geographic lotteries that define the modern federal docket.
+As policymakers continue to debate the balance between
+deterring corporate fraud and curbing frivolous litigation,
+the findings presented here provide a rigorous empirical
+foundation. Evaluating the health of the securities
+litigation system requires looking beyond simple settlement
+averages; it demands an accounting of the competing risks,
+procedural delays, and geographic disparities that define
+the modern federal docket.
