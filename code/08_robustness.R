@@ -13,7 +13,25 @@
 # Seed: N/A (deterministic)
 # ============================================================
 
-source("code/utils.R")
+get_script_path <- function() {
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", cmd_args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(normalizePath(sub("^--file=", "", file_arg[1]), winslash = "/", mustWork = TRUE))
+  }
+  for (i in rev(seq_along(sys.frames()))) {
+    if (!is.null(sys.frames()[[i]]$ofile)) {
+      return(normalizePath(sys.frames()[[i]]$ofile, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Unable to resolve script path for sourcing utils.R")
+}
+
+script_path <- get_script_path()
+project_root <- dirname(dirname(script_path))
+setwd(project_root)
+source(file.path(project_root, "code", "utils.R"))
+rm(get_script_path, project_root, script_path)
 
 cat("=================================================================\n")
 cat(" 08_robustness.R — ROBUSTNESS CHECKS\n")
@@ -106,12 +124,12 @@ rob_9th <- run_pslra_cox(
   "Ninth Circuit only"
 )
 
-# 4. Secular time-trend control (natural spline)
-# The key identification challenge: post_pslra is collinear with calendar time.
-# A linear filing_year control is too restrictive — it forces 34 years of non-linear
-# judicial drift into one slope, absorbing the PSLRA step-change. A natural spline
-# (df=3) flexibly captures secular trends while preserving the PSLRA discontinuity.
-# Validated by verify_dismissal_flip.R: linear → HR=0.598 (artifact); spline → HR=1.94.
+# 4. Secular time-trend sensitivity (natural spline)
+# post_pslra is mechanically tied to calendar time, so a linear filing_year
+# control can be too restrictive over a 34-year span. A natural spline (df=3)
+# is a sensitivity check that allows smoother non-linear drift in filing year.
+# verify_dismissal_flip.R shows the dismissal HR changes materially under this
+# specification: linear HR = 0.598 versus spline HR ≈ 3.51.
 cat("  [7/7] Time-trend control (+ ns(filing_year, df=3))...\n")
 library(splines)
 

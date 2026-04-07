@@ -1,16 +1,34 @@
 # ============================================================
 # Script: verify_dismissal_flip.R
-# Purpose: Four stress tests to break the Dismissal Flip (HR=0.598)
+# Purpose: Four stress tests for the Dismissal Flip time-control result
 #   Step 1: Non-linear spline test (ns(filing_year, df=3))
-#   Step 2: Clean window RDD (1993-1998 only)
-#   Step 3: 1992 placebo test (fake PSLRA on pre-PSLRA only)
+#   Step 2: Local window comparison (1993-1998 only)
+#   Step 3: 1992 placebo split (pre-PSLRA only)
 #   Step 4: IPTW trimming sensitivity (95th vs 99th percentile)
 # Input: data/cleaned/securities_cohort_cleaned.rds
 # Output: Console output only (verification — no saved objects)
 # Dependencies: survival, splines, tidyverse, here, WeightIt, cobalt
 # ============================================================
 
-source("code/utils.R")
+get_script_path <- function() {
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", cmd_args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(normalizePath(sub("^--file=", "", file_arg[1]), winslash = "/", mustWork = TRUE))
+  }
+  for (i in rev(seq_along(sys.frames()))) {
+    if (!is.null(sys.frames()[[i]]$ofile)) {
+      return(normalizePath(sys.frames()[[i]]$ofile, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Unable to resolve script path for sourcing utils.R")
+}
+
+script_path <- get_script_path()
+project_root <- dirname(dirname(script_path))
+setwd(project_root)
+source(file.path(project_root, "code", "utils.R"))
+rm(get_script_path, project_root, script_path)
 
 cat("=================================================================\n")
 cat(" DISMISSAL FLIP STRESS TESTS\n")
@@ -25,7 +43,7 @@ cat(sprintf("Loaded: %s rows\n\n", format(nrow(df), big.mark = ",")))
 cat("=================================================================\n")
 cat(" STEP 1: NON-LINEAR SPLINE TEST\n")
 cat(" Replace linear filing_year with ns(filing_year, df=3)\n")
-cat(" If PSLRA dismissal HR < 1.0 vanishes → linear model was overfitted\n")
+cat(" If PSLRA dismissal HR < 1.0 vanishes → linear time control was too restrictive\n")
 cat("=================================================================\n\n")
 
 library(splines)
@@ -102,12 +120,12 @@ cat(sprintf("\nVIF for post_pslra in spline model: %.2f\n", vif_manual))
 
 
 # =============================================================================
-# STEP 2: CLEAN WINDOW RDD (1993-1998)
+# STEP 2: LOCAL WINDOW COMPARISON (1993-1998)
 # =============================================================================
 cat("\n\n=================================================================\n")
-cat(" STEP 2: CLEAN WINDOW RDD TEST (1993-1998)\n")
-cat(" If Flip is real, HR should be < 1.0 WITHOUT any time controls\n")
-cat(" If HR > 1.0, the 30-year flip is a long-term trend artifact\n")
+cat(" STEP 2: LOCAL WINDOW COMPARISON (1993-1998)\n")
+cat(" Check whether the sign persists in a narrow pre/post PSLRA window\n")
+cat(" without imposing any explicit filing_year trend control\n")
 cat("=================================================================\n\n")
 
 df_window <- df %>% filter(filing_year >= 1993, filing_year <= 1998)
@@ -122,7 +140,7 @@ cat(sprintf("  Events: %d settlements, %d dismissals, %d censored\n",
     sum(df_window$event_type == 2),
     sum(df_window$event_type == 0)))
 
-# NO time controls — pure RDD comparison
+# NO time controls — local window comparison
 cox_s_window <- coxph(
   Surv(duration_years, event_type == 1) ~ post_pslra,
   data = df_window
@@ -150,7 +168,7 @@ print(summary(cox_d_window))
 cat("\nFull summary — Settlement (1993-1998 window):\n")
 print(summary(cox_s_window))
 
-# Also try with filing_year in the window (should barely change — only 6 years)
+# Also try with filing_year in the window (should be modest over only 6 years)
 cox_d_window_time <- coxph(
   Surv(duration_years, event_type == 2) ~ post_pslra + filing_year,
   data = df_window
@@ -167,9 +185,9 @@ cat(sprintf("  Dismissal:  HR = %.4f, 95%% CI: [%.4f, %.4f], p = %.2e\n",
 # STEP 3: 1992 PLACEBO TEST
 # =============================================================================
 cat("\n\n=================================================================\n")
-cat(" STEP 3: PLACEBO TEST (fake PSLRA date = Jan 1, 1992)\n")
+cat(" STEP 3: PLACEBO SPLIT TEST (fake PSLRA date = Jan 1, 1992)\n")
 cat(" Run on pre-PSLRA cases only (1990-1995)\n")
-cat(" If the fake law produces HR < 1.0, our model is hallucinating\n")
+cat(" If the fake split is significant, secular time structure remains even pre-PSLRA\n")
 cat("=================================================================\n\n")
 
 df_pre <- df %>% filter(post_pslra == 0)
@@ -212,7 +230,7 @@ cat(sprintf("  Dismissal:  HR = %.4f, 95%% CI: [%.4f, %.4f], p = %.4f\n",
 cat("\nFull summary — Dismissal (placebo 1992):\n")
 print(summary(cox_d_placebo))
 
-# Also: placebo with filing_year control (should also be null)
+# Also: placebo with filing_year control
 cox_d_placebo_time <- coxph(
   Surv(duration_years, event_type == 2) ~ placebo_pslra + filing_year,
   data = df_pre
@@ -294,23 +312,27 @@ run_iptw_at_trim <- function(df, pctl, label) {
       exp(confint(d_msm)["post_pslra", 2]),
       summary(d_msm)$coefficients["post_pslra", "Pr(>|z|)"]))
 
-  # Doubly Robust (Row 3 equivalent)
-  ext_rhs <- "post_pslra + circuit_f + origin_cat + mdl_flag + juris_fq + stat_basis_f"
-  s_dr <- coxph(as.formula(paste("Surv(duration_years, event_type == 1) ~", ext_rhs)),
-                 data = df, weights = att_w, robust = TRUE)
-  d_dr <- coxph(as.formula(paste("Surv(duration_years, event_type == 2) ~", ext_rhs)),
-                 data = df, weights = att_w, robust = TRUE)
+  # Weighted + Covariates (Row 3 equivalent)
+  if (include_stat) {
+    ext_rhs <- "post_pslra + circuit_f + origin_cat + mdl_flag + juris_fq + stat_basis_f"
+  } else {
+    ext_rhs <- "post_pslra + circuit_f + origin_cat + mdl_flag + juris_fq"
+  }
+  s_ra_iptw <- coxph(as.formula(paste("Surv(duration_years, event_type == 1) ~", ext_rhs)),
+                     data = df, weights = att_w, robust = TRUE)
+  d_ra_iptw <- coxph(as.formula(paste("Surv(duration_years, event_type == 2) ~", ext_rhs)),
+                     data = df, weights = att_w, robust = TRUE)
 
-  cat(sprintf("  Settlement DR:  HR = %.4f, 95%% CI: [%.4f, %.4f], p = %.2e\n",
-      exp(coef(s_dr)["post_pslra"]),
-      exp(confint(s_dr)["post_pslra", 1]),
-      exp(confint(s_dr)["post_pslra", 2]),
-      summary(s_dr)$coefficients["post_pslra", "Pr(>|z|)"]))
-  cat(sprintf("  Dismissal  DR:  HR = %.4f, 95%% CI: [%.4f, %.4f], p = %.2e\n",
-      exp(coef(d_dr)["post_pslra"]),
-      exp(confint(d_dr)["post_pslra", 1]),
-      exp(confint(d_dr)["post_pslra", 2]),
-      summary(d_dr)$coefficients["post_pslra", "Pr(>|z|)"]))
+  cat(sprintf("  Settlement Weighted + Covariates: HR = %.4f, 95%% CI: [%.4f, %.4f], p = %.2e\n",
+      exp(coef(s_ra_iptw)["post_pslra"]),
+      exp(confint(s_ra_iptw)["post_pslra", 1]),
+      exp(confint(s_ra_iptw)["post_pslra", 2]),
+      summary(s_ra_iptw)$coefficients["post_pslra", "Pr(>|z|)"]))
+  cat(sprintf("  Dismissal  Weighted + Covariates: HR = %.4f, 95%% CI: [%.4f, %.4f], p = %.2e\n",
+      exp(coef(d_ra_iptw)["post_pslra"]),
+      exp(confint(d_ra_iptw)["post_pslra", 1]),
+      exp(confint(d_ra_iptw)["post_pslra", 2]),
+      summary(d_ra_iptw)$coefficients["post_pslra", "Pr(>|z|)"]))
 
   invisible(list(ess = ess, cap = cap, n_trimmed = n_trimmed))
 }
@@ -333,16 +355,17 @@ cat(" VERDICT SUMMARY\n")
 cat("=================================================================\n")
 cat("
 Step 1 (Spline):
-  If dismissal HR still < 1.0 and significant → flip is NOT a linear artifact
+  If dismissal HR still < 1.0 and significant → sign is stable to a non-linear time trend
+  If dismissal HR moves materially or changes sign → the linear time control was too restrictive
 
 Step 2 (1993-1998 Window):
-  If dismissal HR > 1.0 → the flip is a 30-year trend artifact, not the law
-  If dismissal HR < 1.0 → the flip reflects an immediate causal discontinuity
+  If dismissal HR > 1.0 → the local-window sign differs from the full-sample time-control result
+  If dismissal HR < 1.0 → the sign persists in the narrow window
   If dismissal HR ≈ 1.0 → inconclusive (underpowered or mixed)
 
 Step 3 (Placebo):
-  If placebo p > 0.05 → model is NOT hallucinating → PASS
-  If placebo p < 0.05 → model picks up spurious patterns → FAIL
+  If placebo p > 0.05 → no comparable pre-PSLRA split is detected
+  If placebo p < 0.05 → secular time structure appears around an arbitrary pre-PSLRA cutoff
 
 Step 4 (Trimming):
   If MSM HRs are stable across 90th/95th/99th → finding is robust to weight extremes

@@ -1,7 +1,46 @@
 # Thesis Rubric & Requirements
 
+**Writing Quality**
+* Writing is clear, concise, and well-polished
+* Material is well-organized and tells a coherent, convincing story
+* All concepts and notation are defined when needed
+* Results are discussed and interpreted in the text, along with any relevant implications or takeaways
+
+**Creativity**
+* Demonstrates independent and novel thinking
+* Shows originality and creativity in problem formulation, methodology, and/or other parts of the work
+
+**Broader Context**
+* Work is related to global, economic, social or environmental impacts
+* Relevant contemporary issues are identified and tied to the Thesis
+
+**Literature Review**
+* Demonstrated the ability to find, read, consolidate, and interpret scientific literature
+* Highlighted gaps or unresolved questions in the literature that provide context for the Thesis
+* Any external information is scholarly, accurate, from relevant sources, and appropriately cited
+
+*Modeling*
+* Modeling choices or assumptions are discussed and justified
+* Demonstrates critical thinking in assessing limitations of one's approach
+
+*Mathematical Depth*
+* Mathematical results are relevant, correct, and discussed in text
+* Any mathematical reasoning serves to help frame and advance the formulation of the problem
+
+*Computational Component*
+* Any computational routines (e.g. algorithms) performed are clearly motivated and communicated
+* Assumptions or limitations of these routines are critically examined and discussed
+
+*Data Analysis*
+* Data sources, summary, and pre-processing are cited (if appropriate) and clearly presented
+* Analysis is thoughtful, accurate, and appropriately supports answering the thesis' research question
+* Inferences drawn from any analysis are sound and well-justified
+
+---
+
 Final Thesis Checklist
 Wrapping Up Your Thesis!
+
 ## Overall Writing
 - [ ] Are references correctly placed and used where needed?
 - [ ] Are paragraphs consistent?
@@ -24,6 +63,7 @@ Wrapping Up Your Thesis!
 
 ## Section by Section Considerations
 Go through each section and make sure you hit the relevant criteria.
+
 ### Abstract - The TL;DR of your Thesis
 - [ ] Is the question/purpose stated?
 - [ ] Is the experimental approach stated?
@@ -32,7 +72,7 @@ Go through each section and make sure you hit the relevant criteria.
 - [ ] Has the abstract been condensed as much as possible?
 - [ ] Is the context and significance of the work apparent?
 - [ ] Does the abstract show that the work was novel?
-- [ ] Length target: 1200-300 words ideal.
+- [ ] Length target: 200-300 words ideal.
 
 ### Introduction
 - [ ] Do you show that the topic is novel?
@@ -73,6 +113,3 @@ Go through each section and make sure you hit the relevant criteria.
 - [ ] Did you provide generalizations where possible?
 - [ ] Are limitations of your work adequately addressed?
 - [ ] Is future work discussed in depth?
-
-
-

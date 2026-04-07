@@ -728,7 +728,7 @@ Fix ALL known bugs during extraction:
 ---
 
 #### Task 16 [REVIEW]: Final Number Verification
-- [~] Code-side revalidation complete (2026-04-06); LaTeX propagation and thesis-level verification still pending
+- [~] Code-side revalidation complete and refreshed again on 2026-04-07; LaTeX propagation and thesis-level verification still pending
 
 **WHAT**: Run a systematic cross-check of every number in the thesis against R output:
 - Re-run all scripts, capture output

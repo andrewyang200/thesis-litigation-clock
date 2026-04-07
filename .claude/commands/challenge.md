@@ -3,6 +3,7 @@ Run a full adversarial review of: $ARGUMENTS
 This is a three-stage quality gate that evaluates code, math, logic, writing, and framing. Determine the scope based on the argument:
 
 - If a `.R` file: focus on code bugs, then check if any thesis chapter reference its output and verify those too
+- If a `.R` file and the user explicitly wants refreshed outputs, rerun the relevant script after the review instead of relying only on saved artifacts
 - If a `.tex` or `.md` file: focus on math, logic, writing, cross-references, and number tracing
 - If a chapter name (e.g., "methodology", "results"): find the relevant .tex file AND the R scripts that produced results for that chapter, review both
 - If "full thesis" or "everything": DO NOT review it all at once. Propose a chunked review plan (e.g., "I will run the challenge on Intro + Methods first, then Results + Discussion"). Wait for approval before starting the first chunk.

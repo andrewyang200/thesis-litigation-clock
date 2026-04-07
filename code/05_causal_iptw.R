@@ -28,7 +28,7 @@
 # FOUR ESTIMATION STRATEGIES (the "triangulation"):
 #   1. Unadjusted:           Cox with post_pslra only (no covariates)
 #   2. Regression-Adjusted:  Cox with post_pslra + full covariate set
-#   3. Doubly Robust:        IPTW-weighted Cox with full covariate set
+#   3. Weighted + Covariates: IPTW-weighted Cox with full covariate set
 #   4. Marginal Structural:  IPTW-weighted Cox with post_pslra only
 #
 # The informative comparisons are:
@@ -49,7 +49,25 @@
 #   after composition adjustment, PSLRA is associated with X."
 # ============================================================
 
-source("code/utils.R")
+get_script_path <- function() {
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", cmd_args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(normalizePath(sub("^--file=", "", file_arg[1]), winslash = "/", mustWork = TRUE))
+  }
+  for (i in rev(seq_along(sys.frames()))) {
+    if (!is.null(sys.frames()[[i]]$ofile)) {
+      return(normalizePath(sys.frames()[[i]]$ofile, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Unable to resolve script path for sourcing utils.R")
+}
+
+script_path <- get_script_path()
+project_root <- dirname(dirname(script_path))
+setwd(project_root)
+source(file.path(project_root, "code", "utils.R"))
+rm(get_script_path, project_root, script_path)
 
 cat("=================================================================\n")
 cat(" 05_causal_iptw.R — IPTW TRIANGULATION ANALYSIS\n")
@@ -285,49 +303,49 @@ cat(sprintf("  Dismissal:  HR = %.3f, 95%% CI: %.3f--%.3f, p = %.2e\n",
             d_reg_sum$coefficients["post_pslra", "Pr(>|z|)"]))
 
 # =============================================================================
-# SECTION 5a: DOUBLY ROBUST — IPTW-weighted Cox with full covariates
+# SECTION 5a: WEIGHTED + COVARIATES — IPTW-weighted Cox with full covariates
 # =============================================================================
 cat("\n-----------------------------------------------------------------\n")
-cat("ROW 3 — DOUBLY ROBUST: IPTW-weighted Cox + full covariate set\n")
+cat("ROW 3 — WEIGHTED + COVARIATES (Regression-Adjusted IPTW)\n")
 cat("-----------------------------------------------------------------\n")
-cat("(Consistent if EITHER the propensity model OR the outcome model\n")
-cat(" is correctly specified — the 'belt and suspenders' estimator.)\n")
+cat("(IPTW-weighted Cox with the full covariate set in the outcome model;\n")
+cat(" this is regression-adjusted IPTW, not a doubly robust estimator.)\n")
 
 # Weighted Cox with robust (sandwich) SEs.
 # coxph automatically uses Lin-Wei robust variance when weights are provided.
-cox_s_dr <- coxph(
+cox_s_ra_iptw <- coxph(
   as.formula(paste("Surv(duration_years, event_type == 1) ~", ext_rhs)),
   data = df_ext,
   weights = att_weight,
   robust = TRUE
 )
 
-cox_d_dr <- coxph(
+cox_d_ra_iptw <- coxph(
   as.formula(paste("Surv(duration_years, event_type == 2) ~", ext_rhs)),
   data = df_ext,
   weights = att_weight,
   robust = TRUE
 )
 
-s_dr_sum <- summary(cox_s_dr)
-d_dr_sum <- summary(cox_d_dr)
+s_ra_iptw_sum <- summary(cox_s_ra_iptw)
+d_ra_iptw_sum <- summary(cox_d_ra_iptw)
 
 cat(sprintf("\n  Settlement: HR = %.3f, 95%% CI: %.3f--%.3f, p = %.2e\n",
-            exp(coef(cox_s_dr)["post_pslra"]),
-            exp(confint(cox_s_dr)["post_pslra", 1]),
-            exp(confint(cox_s_dr)["post_pslra", 2]),
-            s_dr_sum$coefficients["post_pslra", "Pr(>|z|)"]))
+            exp(coef(cox_s_ra_iptw)["post_pslra"]),
+            exp(confint(cox_s_ra_iptw)["post_pslra", 1]),
+            exp(confint(cox_s_ra_iptw)["post_pslra", 2]),
+            s_ra_iptw_sum$coefficients["post_pslra", "Pr(>|z|)"]))
 cat(sprintf("  Dismissal:  HR = %.3f, 95%% CI: %.3f--%.3f, p = %.2e\n",
-            exp(coef(cox_d_dr)["post_pslra"]),
-            exp(confint(cox_d_dr)["post_pslra", 1]),
-            exp(confint(cox_d_dr)["post_pslra", 2]),
-            d_dr_sum$coefficients["post_pslra", "Pr(>|z|)"]))
+            exp(coef(cox_d_ra_iptw)["post_pslra"]),
+            exp(confint(cox_d_ra_iptw)["post_pslra", 1]),
+            exp(confint(cox_d_ra_iptw)["post_pslra", 2]),
+            d_ra_iptw_sum$coefficients["post_pslra", "Pr(>|z|)"]))
 
-# Full model summaries for the doubly robust models (for reference)
-cat("\n--- Doubly Robust Settlement (full model output) ---\n")
-print(s_dr_sum)
-cat("\n--- Doubly Robust Dismissal (full model output) ---\n")
-print(d_dr_sum)
+# Full model summaries for the weighted + covariates models (for reference)
+cat("\n--- Weighted + Covariates Settlement (full model output) ---\n")
+print(s_ra_iptw_sum)
+cat("\n--- Weighted + Covariates Dismissal (full model output) ---\n")
+print(d_ra_iptw_sum)
 
 # =============================================================================
 # SECTION 5b: MARGINAL STRUCTURAL MODEL — IPTW-weighted Cox, PSLRA only
@@ -377,10 +395,10 @@ cat("-----------------------------------------------------------------\n")
 # constant hazard ratio. The unweighted piecewise decomposition in
 # 03_cox_models.R remains the preferred specification for characterizing
 # the time-varying PSLRA effect.
-cat("Doubly Robust Settlement:\n")
-tryCatch(print(cox.zph(cox_s_dr)), error = function(e) cat("  PH test failed:", e$message, "\n"))
-cat("\nDoubly Robust Dismissal:\n")
-tryCatch(print(cox.zph(cox_d_dr)), error = function(e) cat("  PH test failed:", e$message, "\n"))
+cat("Weighted + Covariates Settlement:\n")
+tryCatch(print(cox.zph(cox_s_ra_iptw)), error = function(e) cat("  PH test failed:", e$message, "\n"))
+cat("\nWeighted + Covariates Dismissal:\n")
+tryCatch(print(cox.zph(cox_d_ra_iptw)), error = function(e) cat("  PH test failed:", e$message, "\n"))
 cat("\nMSM Settlement:\n")
 tryCatch(print(cox.zph(cox_s_msm)), error = function(e) cat("  PH test failed:", e$message, "\n"))
 cat("\nMSM Dismissal:\n")
@@ -406,27 +424,28 @@ extract_pslra <- function(model) {
 # Extract all 8 models
 s_raw_e <- extract_pslra(cox_s_raw);  d_raw_e <- extract_pslra(cox_d_raw)
 s_reg_e <- extract_pslra(cox_s_reg);  d_reg_e <- extract_pslra(cox_d_reg)
-s_dr_e  <- extract_pslra(cox_s_dr);   d_dr_e  <- extract_pslra(cox_d_dr)
+s_ra_iptw_e  <- extract_pslra(cox_s_ra_iptw);   d_ra_iptw_e  <- extract_pslra(cox_d_ra_iptw)
 s_msm_e <- extract_pslra(cox_s_msm);  d_msm_e <- extract_pslra(cox_d_msm)
 
 # Build one table per outcome
-build_triangulation <- function(raw, reg, dr, msm, outcome) {
+build_triangulation <- function(raw, reg, ra_iptw, msm, outcome) {
   tibble(
     Outcome  = outcome,
     Strategy = c("1. Unadjusted", "2. Regression-Adjusted",
-                 "3. Doubly Robust (IPTW+Reg)", "4. Marginal Structural (IPTW only)"),
+                 "3. Weighted + Covariates (Regression-Adjusted IPTW)",
+                 "4. Marginal Structural (IPTW only)"),
     Covariates = c("none", "regression", "regression + weights", "weights only"),
-    HR       = c(raw$hr, reg$hr, dr$hr, msm$hr),
+    HR       = c(raw$hr, reg$hr, ra_iptw$hr, msm$hr),
     `95% CI` = sprintf("%.3f--%.3f",
-                        c(raw$ci_lo, reg$ci_lo, dr$ci_lo, msm$ci_lo),
-                        c(raw$ci_hi, reg$ci_hi, dr$ci_hi, msm$ci_hi)),
-    p        = c(raw$p, reg$p, dr$p, msm$p),
-    `vs Row 1` = sprintf("%+.1f%%", 100 * (c(raw$hr, reg$hr, dr$hr, msm$hr) - raw$hr) / raw$hr)
+                        c(raw$ci_lo, reg$ci_lo, ra_iptw$ci_lo, msm$ci_lo),
+                        c(raw$ci_hi, reg$ci_hi, ra_iptw$ci_hi, msm$ci_hi)),
+    p        = c(raw$p, reg$p, ra_iptw$p, msm$p),
+    `vs Row 1` = sprintf("%+.1f%%", 100 * (c(raw$hr, reg$hr, ra_iptw$hr, msm$hr) - raw$hr) / raw$hr)
   )
 }
 
-tri_settlement <- build_triangulation(s_raw_e, s_reg_e, s_dr_e, s_msm_e, "Settlement")
-tri_dismissal  <- build_triangulation(d_raw_e, d_reg_e, d_dr_e, d_msm_e, "Dismissal")
+tri_settlement <- build_triangulation(s_raw_e, s_reg_e, s_ra_iptw_e, s_msm_e, "Settlement")
+tri_dismissal  <- build_triangulation(d_raw_e, d_reg_e, d_ra_iptw_e, d_msm_e, "Dismissal")
 
 comparison_table <- bind_rows(tri_settlement, tri_dismissal)
 
@@ -447,9 +466,9 @@ cat(sprintf("  Row 1 → Row 2: Regression adjustment shifts settlement HR %+.1f
 cat(sprintf("  Row 1 → Row 4: MSM (weighting only) shifts settlement HR %+.1f%% and dismissal HR %+.1f%%.\n",
             s_shift_1_to_4, d_shift_1_to_4))
 cat(sprintf("  Row 2 vs Row 3 vs Row 4 convergence: Settlement HRs = %.3f / %.3f / %.3f\n",
-            s_reg_e$hr, s_dr_e$hr, s_msm_e$hr))
+            s_reg_e$hr, s_ra_iptw_e$hr, s_msm_e$hr))
 cat(sprintf("                                        Dismissal HRs  = %.3f / %.3f / %.3f\n",
-            d_reg_e$hr, d_dr_e$hr, d_msm_e$hr))
+            d_reg_e$hr, d_ra_iptw_e$hr, d_msm_e$hr))
 
 # =============================================================================
 # SECTION 7: WEIGHTED CIF PLOTS
@@ -553,9 +572,9 @@ iptw_results <- list(
   cox_s_reg = cox_s_reg,
   cox_d_reg = cox_d_reg,
 
-  # Row 3: Doubly robust (IPTW-weighted + extended covariates)
-  cox_s_dr = cox_s_dr,
-  cox_d_dr = cox_d_dr,
+  # Row 3: Weighted + Covariates (regression-adjusted IPTW)
+  cox_s_ra_iptw = cox_s_ra_iptw,
+  cox_d_ra_iptw = cox_d_ra_iptw,
 
   # Row 4: Marginal structural model (IPTW-weighted, PSLRA only)
   cox_s_msm = cox_s_msm,
@@ -593,8 +612,8 @@ cat("=================================================================\n")
 
 # All summary values computed dynamically from model objects
 pseudo_r2 <- 1 - ps_model$deviance / ps_model$null.deviance
-all_p <- c(s_raw_e$p, s_reg_e$p, s_dr_e$p, s_msm_e$p,
-           d_raw_e$p, d_reg_e$p, d_dr_e$p, d_msm_e$p)
+all_p <- c(s_raw_e$p, s_reg_e$p, s_ra_iptw_e$p, s_msm_e$p,
+           d_raw_e$p, d_reg_e$p, d_ra_iptw_e$p, d_msm_e$p)
 max_p <- max(all_p)
 
 # Balance summary
@@ -622,13 +641,13 @@ Balance: %s (PS distance: %.3f)
 SETTLEMENT — PSLRA Hazard Ratios
   1. Unadjusted:           HR = %.3f  (%s)
   2. Regression-Adjusted:  HR = %.3f  (%s)  [%s vs Row 1]
-  3. Doubly Robust:        HR = %.3f  (%s)  [%s vs Row 1]
+  3. Weighted + Covariates (Regression-Adjusted IPTW): HR = %.3f  (%s)  [%s vs Row 1]
   4. Marginal Structural:  HR = %.3f  (%s)  [%s vs Row 1]
 
 DISMISSAL — PSLRA Hazard Ratios
   1. Unadjusted:           HR = %.3f  (%s)
   2. Regression-Adjusted:  HR = %.3f  (%s)  [%s vs Row 1]
-  3. Doubly Robust:        HR = %.3f  (%s)  [%s vs Row 1]
+  3. Weighted + Covariates (Regression-Adjusted IPTW): HR = %.3f  (%s)  [%s vs Row 1]
   4. Marginal Structural:  HR = %.3f  (%s)  [%s vs Row 1]
 
 FINDINGS (computed from model output):
@@ -652,17 +671,17 @@ CAVEATS:
   # Settlement
   s_raw_e$hr, tri_settlement$`95% CI`[1],
   s_reg_e$hr, tri_settlement$`95% CI`[2], tri_settlement$`vs Row 1`[2],
-  s_dr_e$hr,  tri_settlement$`95% CI`[3], tri_settlement$`vs Row 1`[3],
+  s_ra_iptw_e$hr,  tri_settlement$`95% CI`[3], tri_settlement$`vs Row 1`[3],
   s_msm_e$hr, tri_settlement$`95% CI`[4], tri_settlement$`vs Row 1`[4],
   # Dismissal
   d_raw_e$hr, tri_dismissal$`95% CI`[1],
   d_reg_e$hr, tri_dismissal$`95% CI`[2], tri_dismissal$`vs Row 1`[2],
-  d_dr_e$hr,  tri_dismissal$`95% CI`[3], tri_dismissal$`vs Row 1`[3],
+  d_ra_iptw_e$hr,  tri_dismissal$`95% CI`[3], tri_dismissal$`vs Row 1`[3],
   d_msm_e$hr, tri_dismissal$`95% CI`[4], tri_dismissal$`vs Row 1`[4],
   # Dynamic findings
   s_shift_1_to_2, d_shift_1_to_2,
-  s_reg_e$hr, s_dr_e$hr, s_msm_e$hr,
-  d_reg_e$hr, d_dr_e$hr, d_msm_e$hr,
+  s_reg_e$hr, s_ra_iptw_e$hr, s_msm_e$hr,
+  d_reg_e$hr, d_ra_iptw_e$hr, d_msm_e$hr,
   max_p,
   ph_d_msg,
   # Pseudo-R2

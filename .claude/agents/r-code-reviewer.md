@@ -30,7 +30,7 @@ You are reviewing R code for a Princeton ORFE senior thesis on competing-risks s
 
 ### Code Quality
 - Does the script header match what it actually does?
-- Are all file paths relative (no absolute paths, no setwd)?
+- Are file paths repo-relative or derived from the script path? A bootstrap `setwd(project_root)` is acceptable if it is computed from the script location to make `here::here()` resolve correctly; hardcoded user-specific paths are not.
 - Are packages loaded at the top with `library()`?
 - Is output saved to the correct directories?
 - Will the script run independently?

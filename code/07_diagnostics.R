@@ -17,7 +17,25 @@
 # Seed: 42 (train/test split)
 # ============================================================
 
-source("code/utils.R")
+get_script_path <- function() {
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", cmd_args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(normalizePath(sub("^--file=", "", file_arg[1]), winslash = "/", mustWork = TRUE))
+  }
+  for (i in rev(seq_along(sys.frames()))) {
+    if (!is.null(sys.frames()[[i]]$ofile)) {
+      return(normalizePath(sys.frames()[[i]]$ofile, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Unable to resolve script path for sourcing utils.R")
+}
+
+script_path <- get_script_path()
+project_root <- dirname(dirname(script_path))
+setwd(project_root)
+source(file.path(project_root, "code", "utils.R"))
+rm(get_script_path, project_root, script_path)
 
 # Load timeROC and pec (not in default utils.R required list)
 for (pkg in c("timeROC", "pec")) {

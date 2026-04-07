@@ -29,12 +29,13 @@ How do legal regime changes (PSLRA), court geography (federal circuit), and case
 7. Model diagnostics: C-index, time-dependent AUC (`timeROC`), Covariate Balance (IPTW), Frailty Variance, and Schoenfeld residuals for PH testing
 
 ## Current Authoritative Code Run
-- **Date**: 2026-04-06
+- **Date**: 2026-04-07
 - **Scheme A distribution**: 3,801 settlement / 5,971 dismissal / 3,196 censored (`29.3% / 46.0% / 24.6%`)
 - **Baseline Cox PSLRA HRs**: settlement `0.563`, dismissal `1.409`
 - **Extended Cox PSLRA HRs**: settlement `0.784`, dismissal `1.661`
 - **Extended Fine-Gray PSLRA SHRs**: settlement `0.503`, dismissal `1.719`
 - **IPTW MSM PSLRA HRs**: settlement `0.741`, dismissal `1.519`
+- **Diagnostics refreshed**: `tab_model_performance.tex` and `fig_auc_over_time` updated on 2026-04-07 after a full `07_diagnostics.R` rerun
 - For full authoritative numbers and thesis-writing guidance, use `docs/session-log.md`
 
 ## Key Covariates
@@ -64,7 +65,7 @@ How do legal regime changes (PSLRA), court geography (federal circuit), and case
 8. If unsure about a statistical claim, flag it with `% TODO: VERIFY` in LaTeX.
 9. **Scope discipline**: If a task is too large for one session, say so and propose a smaller scope. "This is a 3-session task. Want to start with just [X]?" A working smaller deliverable beats a half-finished ambitious one.
 10. **Operationalize every fix**: When you catch a mistake (wrong code, bad notation, fabricated number, logical flaw), don't just fix it — update the relevant rule file in `.claude/rules/` so the same class of mistake can't recur. Every error is a learning opportunity. Encode the lesson.
-11. Standard Cox models identify associations between covariates and hazard rates. Causal interpretations are reserved for IPTW-adjusted estimates, contingent on assumptions of no unmeasured confounding, positivity, and correct model specification.
+11. Standard Cox and Fine-Gray models identify associations between covariates and hazard rates. In this thesis, IPTW is used as a composition-adjustment / decomposition tool, not as a clean causal-identification design. Do not describe the IPTW results as causal.
 12. ONLY use verified legal definitions and disposition mappings provided in docs/new_lit_sources.txt and docs/fjc_codebook.md. Do not invent legal interpretations outside these documents
 
 ## File Organization

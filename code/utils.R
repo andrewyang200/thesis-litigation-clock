@@ -1,7 +1,7 @@
 # ============================================================
 # Script: utils.R
 # Purpose: Shared helper functions and configuration for all analysis scripts
-# Usage: source("code/utils.R") at the top of every script
+# Usage: source this file via a script-path resolver at the top of each script
 # ============================================================
 
 # --- Package Loading ---

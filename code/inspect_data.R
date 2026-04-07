@@ -1,13 +1,31 @@
 # ============================================================
 # Script: inspect_data.R
-# Purpose: Safely summarize all data files without loading full datasets
+# Purpose: Summarize project data files.
+#          RDS inspection fully loads each object into memory before reporting.
 # ============================================================
 
-cat("=== DATA FILE INSPECTION ===\n\n")
+get_script_path <- function() {
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", cmd_args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(normalizePath(sub("^--file=", "", file_arg[1]), winslash = "/", mustWork = TRUE))
+  }
+  for (i in rev(seq_along(sys.frames()))) {
+    if (!is.null(sys.frames()[[i]]$ofile)) {
+      return(normalizePath(sys.frames()[[i]]$ofile, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Unable to resolve script path for inspect_data.R")
+}
+
+project_root <- dirname(dirname(get_script_path()))
+rm(get_script_path)
+
+cat("=== DATA FILE INSPECTION (RDS objects are fully loaded for inspection) ===\n\n")
 
 # --- Check data/raw/ ---
 cat("--- data/raw/ ---\n")
-raw_files <- list.files("data/raw", full.names = TRUE, recursive = TRUE)
+raw_files <- list.files(file.path(project_root, "data", "raw"), full.names = TRUE, recursive = TRUE)
 raw_files <- raw_files[!grepl("\\.gitkeep$", raw_files)]
 if (length(raw_files) == 0) {
   cat("  NO DATA FILES in data/raw/ (only .gitkeep)\n")
@@ -19,7 +37,7 @@ if (length(raw_files) == 0) {
 
 # --- Check data/cleaned/ ---
 cat("\n--- data/cleaned/ ---\n")
-cleaned_files <- list.files("data/cleaned", full.names = TRUE, recursive = TRUE)
+cleaned_files <- list.files(file.path(project_root, "data", "cleaned"), full.names = TRUE, recursive = TRUE)
 cleaned_files <- cleaned_files[!grepl("\\.gitkeep$", cleaned_files)]
 if (length(cleaned_files) == 0) {
   cat("  NO DATA FILES in data/cleaned/\n")
@@ -31,7 +49,7 @@ if (length(cleaned_files) == 0) {
     ext <- tolower(tools::file_ext(f))
 
     if (ext == "rds") {
-      # Safe: load RDS and inspect
+      # readRDS() fully loads the object into memory before we inspect it.
       tryCatch({
         d <- readRDS(f)
         cat(sprintf("    Class: %s\n", paste(class(d), collapse=", ")))
@@ -81,7 +99,7 @@ if (length(cleaned_files) == 0) {
 
 # --- Check for .rds files in project root (InterimScript saves there) ---
 cat("\n--- .rds files in project root ---\n")
-root_rds <- list.files(".", pattern = "\\.rds$", full.names = TRUE)
+root_rds <- list.files(project_root, pattern = "\\.rds$", full.names = TRUE)
 if (length(root_rds) == 0) {
   cat("  No .rds files in project root\n")
 } else {
@@ -92,12 +110,13 @@ if (length(root_rds) == 0) {
 
 # --- Check for saved analysis RDS anywhere ---
 cat("\n--- .rds files anywhere in project ---\n")
-all_rds <- list.files(".", pattern = "\\.rds$", recursive = TRUE, full.names = TRUE)
+all_rds <- list.files(project_root, pattern = "\\.rds$", recursive = TRUE, full.names = TRUE)
 if (length(all_rds) == 0) {
   cat("  No .rds files found anywhere\n")
 } else {
   for (f in all_rds) {
-    cat(sprintf("  %s (%.1f MB)\n", f, file.size(f) / 1e6))
+    rel_f <- sub(paste0("^", project_root, "/"), "", f)
+    cat(sprintf("  %s (%.1f MB)\n", rel_f, file.size(f) / 1e6))
   }
 }
 

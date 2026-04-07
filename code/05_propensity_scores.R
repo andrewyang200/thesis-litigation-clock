@@ -6,12 +6,30 @@
 #          the diagnostics produced here).
 # Input: data/cleaned/securities_cohort_cleaned.rds
 # Output: output/figures/fig_ps_overlap.{pdf,png}
-#         Console: ESS, positivity violations, balance summary
+#         Console: trimmed ESS, extreme-weight positivity, balance summary
 # Dependencies: survival, tidyverse, here, WeightIt, cobalt
 # Seed: N/A (deterministic — logistic regression)
 # ============================================================
 
-source("code/utils.R")
+get_script_path <- function() {
+  cmd_args <- commandArgs(trailingOnly = FALSE)
+  file_arg <- grep("^--file=", cmd_args, value = TRUE)
+  if (length(file_arg) > 0) {
+    return(normalizePath(sub("^--file=", "", file_arg[1]), winslash = "/", mustWork = TRUE))
+  }
+  for (i in rev(seq_along(sys.frames()))) {
+    if (!is.null(sys.frames()[[i]]$ofile)) {
+      return(normalizePath(sys.frames()[[i]]$ofile, winslash = "/", mustWork = TRUE))
+    }
+  }
+  stop("Unable to resolve script path for sourcing utils.R")
+}
+
+script_path <- get_script_path()
+project_root <- dirname(dirname(script_path))
+setwd(project_root)
+source(file.path(project_root, "code", "utils.R"))
+rm(get_script_path, project_root, script_path)
 
 cat("=================================================================\n")
 cat(" 05_propensity_scores.R — IPTW KILL-SWITCH DIAGNOSTICS\n")
@@ -144,17 +162,34 @@ cat("-----------------------------------------------------------------\n")
 
 df_ext <- df_ext %>%
   mutate(
-    att_weight = ifelse(post_pslra == 1, 1, ps / (1 - ps))
+    att_weight_raw = ifelse(post_pslra == 1, 1, ps / (1 - ps))
   )
+
+w_pre_raw <- df_ext$att_weight_raw[df_ext$post_pslra == 0]
+trim_cap <- quantile(w_pre_raw, 0.99)
+
+df_ext <- df_ext %>%
+  mutate(att_weight = ifelse(post_pslra == 1, 1, pmin(att_weight_raw, trim_cap)))
 
 cat("\n--- ATT Weight Distribution ---\n")
 cat("\nPost-PSLRA (all weight = 1):\n")
 cat(sprintf("  n = %d, sum(w) = %.1f\n",
             sum(df_ext$post_pslra == 1), sum(df_ext$att_weight[df_ext$post_pslra == 1])))
 
-cat("\nPre-PSLRA (reweighted):\n")
+cat("\nPre-PSLRA raw ATT weights:\n")
+cat(sprintf("  n = %d\n", length(w_pre_raw)))
+cat(sprintf("  Weight summary:\n"))
+print(summary(w_pre_raw))
+cat(sprintf("  sum(w) = %.1f\n", sum(w_pre_raw)))
+cat(sprintf("  sd(w)  = %.4f\n", sd(w_pre_raw)))
+
 w_pre <- df_ext$att_weight[df_ext$post_pslra == 0]
-cat(sprintf("  n = %d\n", length(w_pre)))
+n_trimmed <- sum(w_pre_raw > trim_cap)
+pct_trimmed <- 100 * n_trimmed / length(w_pre_raw)
+
+cat(sprintf("\nPre-PSLRA 99th-pctl trimmed ATT weights (cap = %.2f):\n", trim_cap))
+cat(sprintf("  Controls trimmed at cap: %d of %d (%.2f%%)\n",
+            n_trimmed, length(w_pre_raw), pct_trimmed))
 cat(sprintf("  Weight summary:\n"))
 print(summary(w_pre))
 cat(sprintf("  sum(w) = %.1f\n", sum(w_pre)))
@@ -162,13 +197,15 @@ cat(sprintf("  sd(w)  = %.4f\n", sd(w_pre)))
 
 # Effective sample size for the control group
 # ESS = (sum(w))^2 / sum(w^2)
+ess_pre_raw <- sum(w_pre_raw)^2 / sum(w_pre_raw^2)
 ess_pre <- sum(w_pre)^2 / sum(w_pre^2)
 ess_post <- sum(df_ext$post_pslra == 1)  # trivially n_post (all weights = 1)
 ess_total <- ess_pre + ess_post
 
 cat("\n--- Effective Sample Size (ESS) ---\n")
-cat(sprintf("  Pre-PSLRA:  ESS = %.1f  (of %d original, %.1f%% retained)\n",
+cat(sprintf("  Pre-PSLRA (99th-pctl trimmed ATT): ESS = %.1f  (of %d original, %.1f%% retained)\n",
             ess_pre, length(w_pre), 100 * ess_pre / length(w_pre)))
+cat(sprintf("  Pre-PSLRA (raw ATT):              ESS = %.1f\n", ess_pre_raw))
 cat(sprintf("  Post-PSLRA: ESS = %.1f  (all weight = 1)\n", ess_post))
 cat(sprintf("  Total:      ESS = %.1f  (of %d original)\n", ess_total, nrow(df_ext)))
 
@@ -185,42 +222,21 @@ if (ess_pre < 100) {
 # SECTION 4: POSITIVITY CHECK
 # =============================================================================
 cat("\n-----------------------------------------------------------------\n")
-cat("POSITIVITY CHECK: Extreme Propensity Scores\n")
+cat("POSITIVITY CHECK: Extreme ATT Weights After 99th-pctl Trimming\n")
 cat("-----------------------------------------------------------------\n")
 
-# Cases with near-certain classification (PS < 0.01 or > 0.99)
-n_low  <- sum(df_ext$ps < 0.01)
-n_high <- sum(df_ext$ps > 0.99)
-n_extreme <- n_low + n_high
+max_weight_trimmed <- max(w_pre)
 
-cat(sprintf("\n  PS < 0.01:  %d cases (%.2f%%)\n", n_low, 100 * n_low / nrow(df_ext)))
-cat(sprintf("  PS > 0.99:  %d cases (%.2f%%)\n", n_high, 100 * n_high / nrow(df_ext)))
-cat(sprintf("  Total extreme: %d cases (%.2f%%)\n", n_extreme, 100 * n_extreme / nrow(df_ext)))
-
-# Wider thresholds
-n_low5  <- sum(df_ext$ps < 0.05)
-n_high95 <- sum(df_ext$ps > 0.95)
-cat(sprintf("\n  PS < 0.05:  %d cases (%.2f%%)\n", n_low5, 100 * n_low5 / nrow(df_ext)))
-cat(sprintf("  PS > 0.95:  %d cases (%.2f%%)\n", n_high95, 100 * n_high95 / nrow(df_ext)))
-
-# Cross-tab: extreme PS by treatment group
-cat("\n  Extreme PS by group:\n")
-cat(sprintf("    Pre-PSLRA  with PS < 0.05:  %d of %d (%.1f%%)\n",
-            sum(df_ext$ps[df_ext$post_pslra == 0] < 0.05),
-            sum(df_ext$post_pslra == 0),
-            100 * mean(df_ext$ps[df_ext$post_pslra == 0] < 0.05)))
-cat(sprintf("    Post-PSLRA with PS > 0.95:  %d of %d (%.1f%%)\n",
-            sum(df_ext$ps[df_ext$post_pslra == 1] > 0.95),
-            sum(df_ext$post_pslra == 1),
-            100 * mean(df_ext$ps[df_ext$post_pslra == 1] > 0.95)))
-
-# Weight truncation analysis: what if we trim at 99th percentile?
-w99 <- quantile(w_pre, 0.99)
-w_pre_trimmed <- pmin(w_pre, w99)
-ess_trimmed <- sum(w_pre_trimmed)^2 / sum(w_pre_trimmed^2)
-
-cat(sprintf("\n--- Trimming Sensitivity (99th percentile cap at %.2f) ---\n", w99))
-cat(sprintf("  Pre-PSLRA ESS after trimming: %.1f (was %.1f)\n", ess_trimmed, ess_pre))
+cat(sprintf("\n  Control trim cap (99th percentile): %.2f\n", trim_cap))
+cat(sprintf("  Controls trimmed at cap: %d of %d (%.2f%%)\n",
+            n_trimmed, length(w_pre_raw), pct_trimmed))
+cat(sprintf("  Max control weight after trimming: %.2f\n", max_weight_trimmed))
+cat(sprintf("  95th percentile control weight after trimming: %.2f\n",
+            unname(quantile(w_pre, 0.95))))
+cat(sprintf("  99th percentile control weight after trimming: %.2f\n",
+            unname(quantile(w_pre, 0.99))))
+cat(sprintf("\n  Pre-PSLRA ESS after trimming: %.1f (was %.1f before trimming)\n",
+            ess_pre, ess_pre_raw))
 
 # =============================================================================
 # SECTION 5: COVARIATE BALANCE (pre-weighting vs post-weighting)
@@ -236,6 +252,14 @@ w_out <- weightit(
   method = "glm",
   estimand = "ATT"
 )
+w_out$weights[df_ext$post_pslra == 0] <- pmin(
+  w_out$weights[df_ext$post_pslra == 0],
+  trim_cap
+)
+if (!isTRUE(all.equal(unname(df_ext$att_weight), unname(w_out$weights), tolerance = 1e-10))) {
+  stop("Manual ATT weights do not match trimmed WeightIt weights.")
+}
+cat("\nVerified: manual ATT weights match trimmed WeightIt weights.\n")
 
 cat("\nWeightIt summary:\n")
 print(summary(w_out))
@@ -259,29 +283,29 @@ OVERLAP
   Pre-PSLRA PS range:  [%.4f, %.4f]
   Post-PSLRA PS range: [%.4f, %.4f]
 
-POSITIVITY VIOLATIONS
-  PS < 0.01: %d cases (%.2f%%)
-  PS > 0.99: %d cases (%.2f%%)
-  PS < 0.05: %d cases  |  PS > 0.95: %d cases
+POSITIVITY / EXTREME WEIGHTS
+  99th-pctl trim cap: %.2f
+  Controls trimmed at cap: %d of %d (%.2f%%)
+  Max trimmed control weight: %.2f
 
-EFFECTIVE SAMPLE SIZE (ATT weights)
+EFFECTIVE SAMPLE SIZE (99th-pctl trimmed ATT weights)
   Pre-PSLRA ESS: %.1f of %d (%.1f%% efficiency)
-  Pre-PSLRA ESS (99th pctl trimmed): %.1f
+  Pre-PSLRA ESS before trimming: %.1f
 
 DECISION CRITERIA
-  PROCEED if: ESS > 300, overlap visible, no massive positivity holes
-  CAUTION if: 100 < ESS < 300 or >5%% extreme PS
-  KILL if:    ESS < 100, no overlap, or >20%% positivity violations
+  PROCEED if: ESS > 300, overlap visible, limited trimming
+  CAUTION if: 100 < ESS < 300 or >5%% controls hit the trim cap
+  KILL if:    ESS < 100, no overlap, or >20%% controls hit the trim cap
 =================================================================\n",
   format(nrow(df_ext), big.mark = ","),
   sum(df_ext$post_pslra == 0), sum(df_ext$post_pslra == 1),
   min(df_ext$ps[df_ext$post_pslra == 0]), max(df_ext$ps[df_ext$post_pslra == 0]),
   min(df_ext$ps[df_ext$post_pslra == 1]), max(df_ext$ps[df_ext$post_pslra == 1]),
-  n_low, 100 * n_low / nrow(df_ext),
-  n_high, 100 * n_high / nrow(df_ext),
-  n_low5, n_high95,
+  trim_cap,
+  n_trimmed, length(w_pre_raw), pct_trimmed,
+  max_weight_trimmed,
   ess_pre, length(w_pre), 100 * ess_pre / length(w_pre),
-  ess_trimmed
+  ess_pre_raw
 ))
 
 # --- Session Info ---

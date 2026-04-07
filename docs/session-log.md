@@ -1,8 +1,8 @@
 # Thesis State — Phase 4 Final Verification
 
-> Last updated: 2026-04-06.
+> Last updated: 2026-04-07.
 > Current code-side source of truth for this thesis.
-> All numbers below come from the full post-recode rerun on 2026-04-06.
+> All numbers below come from the full post-recode rerun on 2026-04-07.
 > The LaTeX chapters have not yet been updated to match these refreshed outputs.
 
 ---
@@ -15,13 +15,17 @@
 **Phase 3 (Chapter Reconstruction): CLOSED** — Tasks 8-13 complete.  
 **Checkpoint 2: CLOSED** — Full chapter `/challenge` pass completed on 2026-04-05.
 
-**Checkpoint 3: CODE-SIDE REVALIDATION COMPLETE (2026-04-06)**  
+**Checkpoint 3: CODE-SIDE REVALIDATION COMPLETE (refreshed again on 2026-04-07)**  
 The full analysis pipeline was rerun after fixing:
 - judgment-bearing disposition miscoding in `01_clean.R`
 - global censoring of `DISP=18` (statistical closing)
 - global collapse of `origin_cat == "Removed"` into `"Other"`
 - Fine-Gray subject-level clustering with `case_id`
 - diagnostics AUC figure y-axis truncation that dropped the 5-year Fine-Gray settlement point
+- modular-script cwd bootstrapping so the pipeline is runnable from outside the repo root
+- IPTW Row 3 relabeling to "Weighted + Covariates (Regression-Adjusted IPTW)"
+- trimmed-weight kill-switch reporting in `05_propensity_scores.R`
+- removal of stale RDD / identification framing in robustness utilities
 
 **Phase 4 (Polish): IN PROGRESS**
 - Task 14 (Abstract): COMPLETE
@@ -85,7 +89,7 @@ This supersedes the earlier narrower Code 6-only disaggregation.
 
 ---
 
-## 3. Current Authoritative Results (2026-04-06 Rerun)
+## 3. Current Authoritative Results (2026-04-07 Rerun)
 
 ### Baseline Cox (PSLRA only)
 | Outcome | HR | 95% CI | p |
@@ -111,7 +115,7 @@ This supersedes the earlier narrower Code 6-only disaggregation.
 |---|---|---|---|---|
 | 1 | Unadjusted | 0.557 | 1.414 | `0.505--0.615`, `1.273--1.570` |
 | 2 | Regression-Adjusted | 0.784 | 1.661 | `0.709--0.867`, `1.493--1.847` |
-| 3 | Doubly Robust | 0.780 | 1.754 | `0.682--0.892`, `1.549--1.987` |
+| 3 | Weighted + Covariates (Regression-Adjusted IPTW) | 0.780 | 1.754 | `0.682--0.892`, `1.549--1.987` |
 | 4 | **MSM (IPTW only)** | **0.741** | **1.519** | `0.632--0.868`, `1.335--1.729` |
 
 All eight IPTW comparison rows remain statistically significant.
@@ -182,7 +186,7 @@ PH tests on extended Cox models:
 - Constant-HR models remain time-averaged summaries because PH is violated
 - Fine-Gray discrimination remains weaker than Cox for settlement and should be reported honestly
 
-### Known Stale `.tex` Content After the 2026-04-06 Rerun
+### Known Stale `.tex` Content After the 2026-04-07 Rerun
 These files now require number updates before submission:
 - `writing/chapters/abstract.tex`
 - `writing/chapters/introduction.tex`
@@ -239,3 +243,29 @@ Specific stale themes:
 3. `output/models/*.rds` and `output/tables/*.tex` — artifact-level ground truth
 4. `docs/verification-report.md` — historical only, now superseded for code-side numbers
 5. Do not use `code/InterimScript.R` as a source of logic or numbers; it is intentionally disabled
+
+---
+
+## Session: 2026-04-07 Final Output Refresh
+
+### What Changed
+- reran the full authoritative analysis pipeline again: `01_clean -> 02_descriptives -> 03_cox_models -> 04_fine_gray -> 05_propensity_scores -> 05_causal_iptw -> 06_frailty -> 07_diagnostics -> 08_robustness`
+- reran auxiliary sanity-check utilities: `verify_dismissal_flip.R`, `inspect_data.R`, and `code/utils/judgment_diagnostic.R`
+- refreshed the final diagnostics outputs after letting `07_diagnostics.R` complete its long `timeROC` / `pec` stage
+- updated handoff documents and `.claude` review/challenge guidance so the next session does not inherit stale "Doubly Robust", `RDD`, or causal-identification language
+
+### Output Freshness Check
+- all files in `output/figures/` now carry 2026-04-07 timestamps
+- `output/tables/tab_model_performance.tex` refreshed at `2026-04-07 11:42:47`
+- key model artifacts refreshed on 2026-04-07:
+  - `output/models/cox_models.rds`
+  - `output/models/fine_gray_models.rds`
+  - `output/models/iptw_results.rds`
+  - `output/models/frailty_results.rds`
+  - `output/models/robustness_results.rds`
+
+### New-Session Read Order
+1. `CLAUDE.md`
+2. `docs/session-log.md`
+3. `docs/execution-plan.md`
+4. `docs/verification-report.md` only for historical context, not current numbers

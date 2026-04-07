@@ -49,20 +49,20 @@ This means:
 
 ### Methodology (~5-7 pages)
 1. **Goal statement** (first paragraph): "This chapter develops the statistical framework for modeling time-to-resolution..."
-2. **Intuition paragraph** before any math: explain the logical progression of methods in plain language. "We begin with the simplest approach (KM) to establish baseline patterns, then introduce competing risks (CIF) because cases can end in different ways, then build regression models (Cox, Fine-Gray) to isolate the effect of specific factors, and finally use Frailty models and IPTW to elevate our findings from associational to causal, accounting for unobserved geography and shifting case characteristics."
+2. **Intuition paragraph** before any math: explain the logical progression of methods in plain language. "We begin with the simplest approach (KM) to establish baseline patterns, then introduce competing risks (CIF) because cases can end in different ways, then build regression models (Cox, Fine-Gray) to isolate the effect of specific factors, and finally use Frailty models and IPTW as sensitivity and composition-adjustment tools, accounting for unobserved geography and shifting case characteristics without overclaiming causal identification."
 3. Data description: source, sample construction, variable definitions
 4. Notation block: define T, C, δ, λ, F all in one place — with a plain-English gloss for each symbol
 5. KM and CIF estimation — start with what it tells us, then the math
 6. Cause-specific Cox model specification — explain "cause-specific" in accessible terms first
 7. Fine-Gray subdistribution model specification — explain how it differs from Cox in plain language before the formula
 8. Shared Frailty specification: Frame this as "controlling for unobserved jurisdictional culture and baseline judicial hostility to securities claims.
-9. IPTW specification: Frame this as "moving from association to causal identification by balancing the pre- and post-PSLRA case characteristics."
+9. IPTW specification: Frame this as "composition-adjusting the pre- and post-PSLRA comparison by balancing observed case characteristics," not as achieving causal identification.
 10. Model evaluation metrics (C-index, AUC, IBS) — each explained with an analogy or example
 11. PH assumption testing and remedies
 
 ### Results (~6-8 pages)
 1. Descriptive Survival Patterns (KM/CIF baseline plots).
-2. Claim 1: The Causal Impact of the PSLRA (Present the Baseline Cox, then validate it with the IPTW causal hazard ratio and the Piecewise timing model).
+2. Claim 1: The PSLRA Association After Composition Adjustment (Present the Baseline Cox, then compare it to the IPTW hazard ratio and the Piecewise timing model without calling IPTW causal).
 3. Claim 2: Circuit Geography Dictates Outcomes (Present the Circuit Cox models, then validate with the Shared Frailty model to prove it's not just a composition effect).
 4. Claim 3: MDL Consolidation Freezes Resolution (Present the Extended Cox vs. Fine-Gray divergence).
 5. Robustness Checks (Alternative coding schemes).

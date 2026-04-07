@@ -34,7 +34,7 @@ Based on the file type or scope given to you:
 ## Code Bugs (for .R files)
 
 ### Data Integrity
-- [ ] Are disposition codes mapped correctly per FJC Codebook? Scheme A: Settlement = code 13; Dismissal = codes 2,3,4,6,12,14,15,17,18,19. See `code/01_clean.R::code_events()` for authoritative three-scheme (A/B/C) mapping.
+- [ ] Are disposition codes mapped correctly per the current codebook logic? In Scheme A, settlement = code 13 plus plaintiff judgments from DISP `{4,6,15,17,19,20}` when `judgment == 1`; dismissal = codes `{2,3,12,14}` plus defendant judgments from that same judgment-bearing set when `judgment == 2`; DISP 18 is censored. See `code/01_clean.R::code_events()` for the authoritative A/B/C mapping.
 - [ ] Is the PSLRA cutoff date correct? (Dec 22, 1995)
 - [ ] Are negative or zero durations handled? (filing date >= termination date)
 - [ ] Are NAs in key variables handled explicitly?
@@ -42,7 +42,7 @@ Based on the file type or scope given to you:
 - [ ] Are factor levels what the model expects?
 - [ ] Does the event coding match what each model function expects?
 - [ ] Does the script respect the "No Raw Data in Context" rule? (It must not `cat()` large files or print unfiltered dataframes to stdout).
-- [ ] Does the mapping of disposition codes and statutory bases in the R scripts match the official definitions found in docs/fjc_disposition_manual.pdf?
+- [ ] Does the mapping of disposition codes and statutory bases in the R scripts match the official definitions summarized in `docs/fjc_codebook.md` and implemented in `code/01_clean.R`?
 
 ### Statistical Correctness
 - [ ] Is CIF computed with Aalen-Johansen, NOT 1 - KM?
@@ -57,7 +57,7 @@ Based on the file type or scope given to you:
 ### Output Files
 - [ ] Do saved figures have axis labels, titles, and legends?
 - [ ] Do saved tables have the right number of rows/columns?
-- [ ] Are file paths relative (no absolute paths, no setwd)?
+- [ ] Are file paths repo-relative or derived from the script path? A bootstrap `setwd(project_root)` is acceptable if it is computed from the script location to make `here::here()` resolve correctly; hardcoded user-specific paths are not.
 - [ ] Does the script actually produce all files it claims to?
 - [ ] Can the script run independently? (`Rscript code/XX_name.R`)
 

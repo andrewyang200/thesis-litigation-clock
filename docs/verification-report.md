@@ -1,6 +1,6 @@
 # Number Verification Report — Task 4
 
-> **Superseded for code-side numbers on 2026-04-06.** A later full rerun corrected judgment-bearing disposition coding in `01_clean.R`, censored `DISP=18`, and refreshed all model outputs. For the current authoritative code outputs, use `docs/session-log.md`.
+> **Superseded for code-side numbers on 2026-04-07.** Later full reruns corrected judgment-bearing disposition coding in `01_clean.R`, censored `DISP=18`, refreshed the model outputs, and refreshed `07_diagnostics.R`. For the current authoritative code outputs, use `docs/session-log.md`.
 
 > **Generated**: 2026-03-28
 > **Pipeline**: 01_clean.R → 02_descriptives.R → 03_cox_models.R → 04_fine_gray.R → 07_diagnostics.R → 08_robustness.R
