@@ -35,6 +35,8 @@ How do legal regime changes (PSLRA), court geography (federal circuit), and case
 - **Extended Cox PSLRA HRs**: settlement `0.784`, dismissal `1.661`
 - **Extended Fine-Gray PSLRA SHRs**: settlement `0.503`, dismissal `1.719`
 - **IPTW MSM PSLRA HRs**: settlement `0.741`, dismissal `1.519`
+- **Fine-Gray artifact status**: `output/models/fine_gray_models.rds` was regenerated on 2026-04-07 and now retains the model components needed for post-reload `cox.zph()` diagnostics
+- **Authoritative extractor status**: `code/utils/extract_all_numbers.R` now matches `docs/authoritative-numbers.md` and has been verified on the saved-artifact branch, not just the Fine-Gray refit fallback
 - **Diagnostics refreshed**: `tab_model_performance.tex` and `fig_auc_over_time` updated on 2026-04-07 after a full `07_diagnostics.R` rerun
 - For full authoritative numbers and thesis-writing guidance, use `docs/session-log.md`
 
@@ -111,6 +113,8 @@ thesis-project/
 - All scripts read from `data/cleaned/` and write to `output/`
 - Before running any analysis, always read and understand the existing script first
 - Authoritative thesis pipeline: `code/01_clean.R` through `code/08_robustness.R`
+- `code/04_fine_gray.R` is expected to save `output/models/fine_gray_models.rds`
+- `code/utils/extract_all_numbers.R` is the single-run verifier for `docs/authoritative-numbers.md` and should succeed with `fine_gray_models.rds` present
 - `code/InterimScript.R` is historical only and intentionally stops if run
 - `code/verify_dismissal_flip.R` and `code/utils/judgment_diagnostic.R` are auxiliary sanity-check tools, not primary sources for thesis tables or prose
 

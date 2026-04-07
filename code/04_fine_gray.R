@@ -89,7 +89,8 @@ fg_base_s_data <- tryCatch(
 )
 fg_base_s <- if (!is.null(fg_base_s_data)) tryCatch(
   coxph(Surv(fgstart, fgstop, fgstatus) ~ post_pslra + circuit_f,
-        data = fg_base_s_data, weights = fgwt, cluster = case_id),
+        data = fg_base_s_data, weights = fgwt, cluster = case_id,
+        x = TRUE, y = TRUE, model = TRUE),
   error = function(e) { cat("  coxph error (base S):", e$message, "\n"); NULL }
 )
 
@@ -102,7 +103,8 @@ fg_base_d_data <- tryCatch(
 )
 fg_base_d <- if (!is.null(fg_base_d_data)) tryCatch(
   coxph(Surv(fgstart, fgstop, fgstatus) ~ post_pslra + circuit_f,
-        data = fg_base_d_data, weights = fgwt, cluster = case_id),
+        data = fg_base_d_data, weights = fgwt, cluster = case_id,
+        x = TRUE, y = TRUE, model = TRUE),
   error = function(e) { cat("  coxph error (base D):", e$message, "\n"); NULL }
 )
 
@@ -189,7 +191,8 @@ fg_ext_s_data <- tryCatch(
 )
 fg_s_ext <- if (!is.null(fg_ext_s_data)) tryCatch(
   coxph(as.formula(paste("Surv(fgstart, fgstop, fgstatus) ~", ext_formula_rhs)),
-        data = fg_ext_s_data, weights = fgwt, cluster = case_id),
+        data = fg_ext_s_data, weights = fgwt, cluster = case_id,
+        x = TRUE, y = TRUE, model = TRUE),
   error = function(e) { cat("  coxph error (ext S):", e$message, "\n"); NULL }
 )
 
@@ -201,7 +204,8 @@ fg_ext_d_data <- tryCatch(
 )
 fg_d_ext <- if (!is.null(fg_ext_d_data)) tryCatch(
   coxph(as.formula(paste("Surv(fgstart, fgstop, fgstatus) ~", ext_formula_rhs)),
-        data = fg_ext_d_data, weights = fgwt, cluster = case_id),
+        data = fg_ext_d_data, weights = fgwt, cluster = case_id,
+        x = TRUE, y = TRUE, model = TRUE),
   error = function(e) { cat("  coxph error (ext D):", e$message, "\n"); NULL }
 )
 

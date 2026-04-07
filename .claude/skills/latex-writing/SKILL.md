@@ -104,18 +104,4 @@ PSLRA (post-1995) & [ACTUAL_HR] & ([LOWER_CI], [UPPER_CI]) & [ACTUAL_P] \\
 \end{figure}
 ```
 
-## Converting R Results to Prose
-When translating model output to thesis text:
-1. Lead with the finding: "PSLRA reduced settlement hazard by approximately 62%"
-2. Provide the evidence: "($\text{HR} = 0.38$, 95\% CI: 0.34--0.42, $p < 0.001$)"
-3. Contextualize: "This aligns with the legislative intent of raising pleading standards"
-4. Compare across models: "The Fine-Gray subdistribution model yields a similar direction but attenuated magnitude ($\text{SHR} = 0.45$)"
 
-## Advisor Feedback Integration
-The advisor's key feedback points that must be addressed:
-1. Every chapter needs a clear opening goal statement ← enforced in every chapter
-2. Terminology confusion between statistical "violations" and legal "violations" ← clarified in methodology
-3. Notation inconsistencies (especially λ subscripts) ← fixed via notation block
-4. Results need prose discussion, not just tables ← enforced in results template
-5. Model accuracy metrics missing ← added C-index, AUC,
-6. Discussion/Conclusion chapter was missing ← now required
