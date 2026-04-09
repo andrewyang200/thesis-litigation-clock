@@ -8,10 +8,10 @@
 \graphicspath{{./Figures/}}
 \usepackage{url}
 \usepackage{booktabs} % Added for professional-looking tables in data.tex
-\usepackage[justification=raggedright, singlelinecheck=false, labelfont=bf]{caption}
 \usepackage{natbib}
 \usepackage{subcaption}
 \usepackage[hidelinks]{hyperref}
+\setlength{\belowcaptionskip}{10pt} % Space between caption and table body
 
 
 % Ensure chapter-based line numbering if needed, though often omitted for reports
@@ -23,7 +23,11 @@
 \author{Andrew Yang}
 \advisor{Prof. Ioannis Akrotirianakis} % Placeholder for your advisor
 
-\dedication{} % Placeholder, as discussed
+\dedication{
+\begin{center}
+    \emph{For my readers. \\Whether by accident, obligation, or genuine interest---congratulations on making it past the title page. You are already in the top 1\%.}
+\end{center}
+}
 
 \abstract{
 \input{./Chapters/abstract}
