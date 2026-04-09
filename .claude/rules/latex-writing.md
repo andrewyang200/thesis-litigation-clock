@@ -22,10 +22,12 @@ Every chapter MUST open with 1-3 sentences stating:
 ## LaTeX Conventions
 - Use `\input{Chapters/filename}` to include chapter files
 - Cross-references: `Figure~\ref{fig:xxx}`, `Table~\ref{tab:xxx}`, `Equation~\eqref{eq:xxx}`
-- `\citep{key}` for textual citations, `\citep{key}` for parenthetical
+- `\citet{key}` for textual citations, `\citep{key}` for parenthetical
 - Wrap all math in `\( \)` for inline, `\[ \]` or `equation` env for display
 - Use `booktabs` for tables (no vertical rules)
 - Keep paragraphs focused — one idea per paragraph
+- Avoid unsupported novelty claims such as "first," "novel," or "unique" unless the literature review has already established the comparison set; otherwise describe the contribution directly.
+- If a priority claim is warranted but not fully exhaustive, hedge it precisely with "to our knowledge" and specify the exact estimand, model class, or empirical object that is new.
 
 ## Quality Markers
 - Flag uncertain claims: `% TODO: VERIFY — [what needs checking]`

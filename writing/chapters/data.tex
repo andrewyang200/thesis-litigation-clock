@@ -18,7 +18,7 @@ case records span from approximately 1970 to the present,
 with substantially improved coverage quality after 1988.
 The IDB is the most comprehensive source for population-level
 data on federal civil litigation, covering virtually all cases
-filed in federal district courts regardless of whether they
+filed in federal district courts, regardless of whether they
 generate published opinions or disclosed settlement amounts.
 This population-level coverage is a key advantage over
 practitioner datasets, which typically track only high-profile
@@ -37,7 +37,7 @@ was filed. Securities class actions are identified using NOS~850.
 
 \section{Sample Construction}
 
-We begin with all civil cases coded as NOS~850 filed from 1990 onward, yielding 65,899 cases. The 1990 start date balances sample size against data quality and provides a meaningful pre-PSLRA comparison period. We then retain cases with the IDB class action flag equal to~1, restricting the sample to cases procedurally designated as class actions---the form of litigation directly subject to the PSLRA's heightened pleading requirements. This reduces the sample to 13,708 cases (20.8\% of NOS~850 filings). Finally, we exclude cases with non-positive computed durations---740 zero-duration entries that we treat as administrative artifacts, though a small number may represent genuine same-day resolutions---yielding a final analysis sample of 12,968 federal securities class actions filed between 1990 and 2024.
+We begin with all civil cases coded as NOS~850 filed from 1990 onward, yielding 65,899 cases. The 1990 start date balances sample size against data quality and provides a meaningful pre-PSLRA comparison period. We then retain cases with the IDB class action flag equal to~1, restricting the sample to cases procedurally designated as class actions---the form of litigation directly subject to the PSLRA's heightened pleading requirements. This reduces the sample to 13,708 cases (20.8\% of NOS~850 filings). Finally, we exclude cases with non-positive computed durations---740 zero-duration entries that we treat as administrative artifacts, yielding a final analysis sample of 12,968 federal securities class actions filed between 1990 and 2024.
 
 \begin{table}[htbp]
 \centering
@@ -99,8 +99,7 @@ known Code~12 ambiguity:
 \begin{itemize}
     \item \textbf{Scheme~A (Narrow).} Code~13 $\to$
     settlement; Codes~2, 3, 12, 14 $\to$ dismissal.
-    Six judgment-bearing disposition codes---4, 6, 15,
-    17, 19, and 20---are disaggregated using the IDB
+    Six judgment-bearing disposition codes---\{4, 6, 15, 17, 19, 20\}---are disaggregated using the IDB
     \texttt{JUDGMENT} field: \texttt{JUDGMENT}~$= 1$
     (plaintiff victory) $\to$ settlement;
     \texttt{JUDGMENT}~$= 2$ (defendant victory) $\to$
@@ -370,8 +369,4 @@ Post-PSLRA  & 11,936 & 3,336 & 5,597 & 3,003 & 27.9 & 46.9 \\
 
 \section{Data Access and Replication}
 
-The IDB is publicly available from the FJC
-upon request at no cost. All data cleaning, variable
-construction, and coding scheme implementation are documented
-in the R analysis script and will be released as a public
-replication package alongside the final thesis submission.
+The IDB is publicly available from the FJC at no cost. The complete replication package---including all analysis code, variable construction scripts, coding scheme implementation, figure generation routines, and output files---is publicly available at \url{https://github.com/andrewyang200/thesis-litigation-clock}.

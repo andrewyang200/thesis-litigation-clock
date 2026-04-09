@@ -133,10 +133,19 @@ save_base_plot <- function(filename, width, height, plot_fn) {
       width = width, height = height)
   plot_fn()
   dev.off()
-  png(here::here("output", "figures", paste0(filename, ".png")),
+  png_path <- here::here("output", "figures", paste0(filename, ".png"))
+  png(png_path,
       width = width, height = height, units = "in", res = 300)
   plot_fn()
   dev.off()
+  if (nzchar(Sys.which("sips"))) {
+    system2(
+      "sips",
+      c("-s", "dpiWidth", "300", "-s", "dpiHeight", "300", png_path),
+      stdout = FALSE,
+      stderr = FALSE
+    )
+  }
   cat(sprintf("  Saved: output/figures/%s.{pdf,png}\n", filename))
 }
 

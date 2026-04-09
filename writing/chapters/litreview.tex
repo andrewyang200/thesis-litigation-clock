@@ -106,12 +106,13 @@ The PSLRA represents the most significant procedural reform in
 securities class action history, reshaping the litigation
 landscape through heightened pleading requirements, an
 automatic discovery stay, and lead-plaintiff provisions
-\citep{johnson2001}. Empirical studies have found that these
-reforms were associated with higher early dismissal rates for
-cases lacking strong merit signals---such as accounting
-restatements, parallel SEC enforcement actions, or insider
-trading allegations---while allowing meritorious cases to
-proceed \citep{johnson2001, choi2007}.
+\citep{perino2003, choi2007}. Empirical studies have found
+that these reforms increased the importance of merit-related
+signals in both filing and resolution. Claims with hard-evidence
+indicia such as accounting restatements, SEC actions, or abnormal
+insider trading were more likely to survive, while claims lacking
+such signals were more vulnerable to dismissal or low-value
+settlement \citep{johnson2007, choi2007}.
 
 However, existing studies have not formally tested whether PSLRA 
 effects vary over litigation duration, whether they differ between
@@ -120,7 +121,7 @@ the reform's impact was heterogeneous across judicial circuits.
 Consequently, it remains an open question in the literature 
 whether the PSLRA operated uniformly as a static filter, or 
 whether its procedural mechanisms generated time-dependent and 
-geographically fragmented impacts on case resolution.
+geographically heterogeneous impacts on case resolution.
 
 \subsection{Determinants of Settlement and Duration}
 
@@ -137,18 +138,9 @@ higher amounts but exhibit longer durations
 Other determinants include merit signals (accounting
 restatements, SEC investigations), statutory basis
 (Section~11 versus Section~10(b) claims), and forum variation
-across federal circuits \citep{johnson2001, perino2003}.
+across federal circuits \citep{johnson2007, choi2007, perino2003}.
 Law firm market share has also been shown to be associated
 with case outcomes and settlement patterns \citep{wang2022}.
-Furthermore, MDL consolidation represents a
-distinct procedural pathway that concentrates large numbers
-of related cases before a single judge. Yet, the current
-literature lacks a dynamic analysis of how this consolidation
-changes settlement and dismissal timing jointly over
-follow-up. Because MDL can reshape both pathways at once,
-its net effect on cumulative outcome probabilities cannot be
-determined from static models that examine each outcome
-in isolation.
 
 \subsection{Prior Use of Survival Methods}
 
@@ -170,7 +162,7 @@ A major challenge in using the IDB for this analysis is outcome coding. Voluntar
 include settlement-like resolutions, and judgment-bearing
 dispositions can conflate plaintiff and defendant victories
 unless the IDB's \texttt{JUDGMENT} field is consulted.
-Docket-based work and prior audits therefore suggest that raw
+Docket-based work and prior audits, therefore, suggest that raw
 IDB disposition fields can misstate settlement counts and
 misclassify outcomes \citep{scales2024, clermont2002,
 hadfield2004}. These measurement problems make the IDB
@@ -200,16 +192,24 @@ without formal hazard modeling \citep{cornerstone2024}.
 Academic studies use Cox models conditional on settlement
 without accounting for competing risks \citep{brochet2014},
 or analyze outcomes using static regression methods that ignore
-duration \citep{cox2008, johnson2001}. To our knowledge, none estimate joint
+duration \citep{cox2008, johnson2007}. To our knowledge, none estimate joint
 cause-specific hazard functions, subdistribution hazards, and
 cumulative incidence curves for settlement and dismissal while
 properly accounting for censoring and the mutually exclusive
 nature of outcomes. Furthermore, we are not aware of prior
 work that separates the PSLRA-period association from
 concurrent changes in case composition using propensity-score
-methods, or that models unobserved circuit-level heterogeneity
+methods or that models unobserved circuit-level heterogeneity
 through shared frailty specifications in this litigation
-context.
+context. Beyond this, MDL consolidation represents a
+distinct procedural pathway that concentrates large numbers
+of related cases before a single judge. Yet, the current
+literature lacks a dynamic analysis of how this consolidation
+changes settlement and dismissal timing jointly over
+follow-up. Because MDL can reshape both pathways at once,
+its net effect on cumulative outcome probabilities cannot be
+determined from static models that examine each outcome
+in isolation.
 
 This thesis fills the gap by applying a full
 competing-risks framework---cause-specific and
@@ -221,5 +221,4 @@ static regression coefficients, this thesis jointly
 estimates cumulative incidence, time-varying and
 circuit-heterogeneous PSLRA associations, and the distinct
 contributions of case composition versus the legislative
-reform itself. The following chapter formalizes the
-statistical framework used to pursue these objectives.
+reform itself.

@@ -142,8 +142,8 @@ where $\lambda_{0k}(t)$ is the unspecified baseline hazard for event type $k$ an
 
 While the cause-specific Cox model asks how covariates alter the
 instantaneous rate of one event among cases still at risk, the
-Fine-Gray model asks how covariates shift the \emph{cumulative
-probability} of that event over time, accounting for the fact
+Fine-Gray model asks how covariates shift the cumulative
+probability of that event over time, accounting for the fact
 that cases experiencing the competing event are permanently
 removed from candidacy. Put differently, the cause-specific
 model asks how quickly pending cases reach an outcome,
@@ -271,10 +271,7 @@ estimation.
 \textbf{Placebo cutoff test.} As a falsification check, we
 construct a placebo ``law'' at January~1, 1992---a date with
 no legislative significance---and re-estimate the Cox model
-on the pre-PSLRA sample only (1990--1995). A significant
-placebo effect would indicate that the model detects
-pre-existing trends, casting doubt on the PSLRA
-identification; an insignificant placebo effect would weaken
+on the pre-PSLRA sample only (1990--1995). A significant placebo effect would indicate either that the model detects pre-existing trends or that a genuine structural break preceded the PSLRA, both of which would cast doubt on a clean PSLRA identification; an insignificant placebo effect would weaken
 one specific concern about secular drift, but would not by
 itself rule out alternative explanations for the estimated PSLRA hazard ratio.
 
@@ -293,24 +290,22 @@ we employ inverse probability of treatment weighting
 
 \subsection{Propensity Score Estimation}
 
-To adjust for compositional differences between pre- and
-post-PSLRA cases, we reweight the pre-PSLRA sample so that its
-observable characteristics (filing circuit, case origin, and
-statutory basis) more closely resemble those of the post-PSLRA
-era. This allows us to separate the PSLRA era difference from
-concurrent shifts in the underlying mix of cases.
+Because the PSLRA represents a sharp legislative cutoff rather than a
+case-specific treatment, the propensity score here captures temporal shifts
+in case composition across eras, not case-level selection into the
+post-PSLRA regime. To adjust for these compositional differences, we
+reweight the pre-PSLRA sample so that its observable characteristics
+(filing circuit, case origin, and statutory basis) more closely resemble
+those of the post-PSLRA era, separating the era difference from concurrent
+shifts in the underlying case mix.
 
-Formally, let $Z_i \in \{0,1\}$ denote the post-PSLRA indicator.
-The propensity score is defined as
+Formally, let $Z_i \in \{0,1\}$ denote the post-PSLRA indicator. The
+propensity score is defined as
 \begin{equation}
 e(\mathbf{X}_i) = P(Z_i = 1 \mid \mathbf{X}_i),
 \end{equation}
-and is estimated via logistic regression of $Z_i$ on observed case
-characteristics (circuit, origin, jurisdictional basis, and
-statutory basis). Because the PSLRA represents a sharp legislative
-cutoff rather than a case-specific treatment, the propensity score
-here captures temporal shifts in case composition across eras, not
-case-level selection into the post-PSLRA regime.
+and is estimated via logistic regression of $Z_i$ on circuit, origin,
+jurisdictional basis, and statutory basis.
 
 \subsection{ATT Weighting}
 
@@ -342,7 +337,7 @@ weighted cause-specific Cox model:
 \lambda_k(t \mid Z_i) = \lambda_{0k}(t) \exp(\beta_k^{\text{w}} Z_i)
 \end{equation}
 where $\beta_k^{\text{w}}$ is the composition-adjusted log-hazard ratio for event type $k$, and each observation contributes to the partial likelihood
-with weight $w_i$ and robust (sandwich) standard errors account
+with weight $w_i$; robust (sandwich) standard errors account
 for the estimated weights \citep{xieliu2005}. We implement a
 four-strategy triangulation:
 \begin{enumerate}
@@ -362,9 +357,9 @@ as the threshold for adequate balance \citep{austinfine2025}.
 
 \subsection{Interpretive Scope}
 
-We interpret IPTW-weighted hazard ratios strictly as composition-adjusted estimates. They compare pre- and post-PSLRA cases under a common observable case mix. We do \emph{not} interpret them as causal effects of the PSLRA.
+We interpret IPTW-weighted hazard ratios strictly as composition-adjusted estimates. They compare pre- and post-PSLRA cases under a common observable case mix. We do not interpret them as causal effects of the PSLRA.
 
-Valid causal inference using IPTW would require three assumptions, each of which is difficult to satisfy here:
+Valid causal inference using IPTW requires three assumptions, each of which is difficult to satisfy here:
 \begin{enumerate}
     \item \textbf{Conditional exchangeability (no unmeasured
     confounding).} All common causes of both PSLRA era assignment and litigation outcomes must be observed and included in the propensity score model. This is implausible over a
@@ -502,4 +497,4 @@ discrimination metrics such as the C-index or AUC.
 
 \section{Limitations of the Modeling Framework}
 
-All models condition on observed administrative covariates available in the IDB. Unobserved factors may still influence both the probability and timing of outcomes, and finer-grained clustering at the judge level is infeasible due to the absence of consistent judge identifiers in the database. The substantive implications are taken up in Chapter~\ref{ch:discussion}.
+All models condition on the observed administrative covariates available in the IDB. However, unobserved factors may still affect both the likelihood and timing of outcomes, and more granular clustering at the judge level is not feasible because the database lacks consistent judge identifiers. The substantive implications are discussed in Chapter~\ref{ch:discussion}.
